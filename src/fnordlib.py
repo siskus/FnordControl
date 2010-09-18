@@ -20,7 +20,7 @@
 from serial import Serial, EIGHTBITS, STOPBITS_ONE
 from threading import Lock
 
-LIGHTCOUNT = 8
+LIGHTCOUNT = 20
 DEBUG = 1
 
 class FnordBus:
@@ -48,10 +48,10 @@ class FnordBus:
         
         self.lock = Lock()
         
-        lights = []
+        self.lights = []
         
         for x in range(LIGHTCOUNT):
-            lights.append(FnordLight(self, x))
+            self.lights.append(FnordLight(self, x))
             
         self.sync()
         self.stop()
@@ -151,6 +151,66 @@ class FnordBus:
         
         self.fade_rgb(addr, 0, 0, 0)
         
+    
+        
+class FnordCluster():
+    
+    cluster = None
+    
+    red = 0
+    green = 0
+    blue = 0
+    
+    
+    def __init__(self):
+        self.cluster = []
+        
+    
+    def registerLight(self, light):
+        
+        if DEBUG:
+            print("FnordCluster: Register light")
+        
+        self.cluster.append(light)
+        
+    
+    def removeLight(self, light):
+        
+        self.cluster.remove(light)
+        
+        
+    def black(self):
+        
+        for light in self.cluster:
+            light.black(self.number)
+        
+        
+    def setRGB(self, r, g, b):
+        
+        self.red = r
+        self.green = g
+        self.blue = b
+        
+        
+    def getRGB(self):
+        
+        return (self.red, self.green, self.blue) 
+        
+        
+    def update(self):
+        
+        for light in self.cluster:
+            light.fade_rgb(self.red, self.green, self.blue)
+        
+        
+    def fade_rgb(self, r, g, b, step = 5, delay = 0):
+        
+        if DEBUG:
+            print("FnordCluster: fade_rgb to (%s,%s,%s)" % (r, g, b) )
+
+        for light in self.cluster:
+            light.fade_rgb(r, g, b, step, delay)
+                
         
         
 class FnordLight():
@@ -191,6 +251,9 @@ class FnordLight():
         self.fnordcontroller.fade_rgb(self.number, self.red, self.green, self.blue)
         
         
-    def fade_rgb(self, addr, r, g, b, step = 5, delay = 0):
+    def fade_rgb(self, r, g, b, step = 5, delay = 0):
+        
+        if DEBUG:
+            print("FnordLight(%s): fade_rgb (%s,%s,%s)" % (self.number, r, g, b) )
 
         self.fnordcontroller.fade_rgb(self.number, r, g, b, step, delay)
