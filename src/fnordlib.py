@@ -2,6 +2,8 @@
 # -*- coding: utf-8-*-
 
 #         fnordlib
+# A collection of classes to control fnordlights on different levels of 
+# abstraction
 #
 # (c) by Markus Müller <siskus@gmail.com>
 #
@@ -19,16 +21,35 @@
 
 from serial import Serial, EIGHTBITS, STOPBITS_ONE
 from threading import Lock
+import random
+from math import floor, ceil
 
+# Number of lights to be accessible on the bus
 LIGHTCOUNT = 20
+
+# If true, enable debug outputs
 DEBUG = 1
 
+
+#===============================================================================
+# FnordBus
+# ========
+#
+# This is the the most basic abstraction from a FnordNet-Bus with FnordLights
+# connected.
+# Upon object creation, it will initialize the bus. This means that it will
+# instruct the light to stop fading and it sends a sync signal through the
+# bus.  
+#===============================================================================
 class FnordBus:
     
     con = None
     
     lock = None
     
+    # These three variables hold a "bus color". The controller has the ability
+    # to let all the lights on bus display this color. It is controlled via
+    # the appropriate functions (setRGB, getRGB and update)
     red = 0
     green = 0
     blue = 0
@@ -50,6 +71,8 @@ class FnordBus:
         
         self.lights = []
         
+        # The controller creates individual FnordLight objects for each
+        # FnordLight on the bus
         for x in range(LIGHTCOUNT):
             self.lights.append(FnordLight(self, x))
             
@@ -57,11 +80,19 @@ class FnordBus:
         self.stop()
         
     
+    #===========================================================================
+    # getFnordLight
+    # Returns a specific FnordLight from the bus
+    #===========================================================================
     def getFnordLight(self, number):
         
         return self.lights[number]
     
     
+    #===========================================================================
+    # setRGB
+    # Sets the "bus color"
+    #===========================================================================
     def setRGB(self, r, g, b):
         
         if DEBUG:
@@ -75,6 +106,10 @@ class FnordBus:
             print("setRGB2 (%s, %s, %s)") % (self.red, self.green, self.blue)
         
         
+    #===========================================================================
+    # getRGB
+    # Return the current "bus color"
+    #===========================================================================
     def getRGB(self):
         
         if DEBUG:
@@ -82,7 +117,11 @@ class FnordBus:
             
         return (self.red, self.green, self.blue) 
         
-        
+    
+    #===========================================================================
+    # update
+    # Instructs all FnordLights to fade to the current "bus color"
+    #===========================================================================
     def update(self):
         
         if DEBUG:
@@ -91,12 +130,21 @@ class FnordBus:
         self.fade_rgb(255, self.red, self.green, self.blue)
            
         
+        
+    #===========================================================================
+    # flush
+    # Flushes the serial buffer in order to write all the bytes out on the bus.
+    #===========================================================================
     def flush(self):
         
         self.con.flushInput()
         self.con.flushOutput()
          
         
+    #===========================================================================
+    # sync
+    # Send a sync signal on the bus
+    #===========================================================================
     def sync(self, addr = 0):
         
         self.lock.acquire()
@@ -111,12 +159,21 @@ class FnordBus:
         self.lock.release()
         
     
+    #===========================================================================
+    # zeros
+    # Helper function to send zeros over the wire
+    #===========================================================================
     def zeros(self, count = 8):
         
         for x in range(count):
             self.con.write( chr(0) )
     
         
+    #===========================================================================
+    # fade_rgb
+    # Fade the FnordLight no. addr to the color (r, g, b) with the optional
+    # step and delay.
+    #===========================================================================
     def fade_rgb(self, addr, r, g, b, step = 5, delay = 0):
         
         self.lock.acquire()
@@ -134,6 +191,10 @@ class FnordBus:
         self.lock.release()
         
         
+    #===========================================================================
+    # stop
+    # Stop the fading on the whole bus if no addr is specified.
+    #===========================================================================
     def stop(self, addr = 255, fading = 1):
         
         self.lock.acquire()
@@ -147,12 +208,29 @@ class FnordBus:
         self.lock.release()
     
     
+    #===========================================================================
+    # black
+    # Fades the entire bus to black if no addr is specified.
+    #===========================================================================
     def black(self, addr = 255):
         
         self.fade_rgb(addr, 0, 0, 0)
         
     
         
+#===============================================================================
+# FnordCluster
+# A FnordCluster is a collection of FnordLights grouped together and treated as
+# a single FnordLight. As it has the same API as a FnordLight, it is possible 
+# to substitute a FnordLight with a FnordCluster without the need to make
+# changes in the programming.
+#
+# It is also possible to add FnordLights or even FnordClusters (since they have
+# the same API) to a FnordCluster in order to synchronize several lights.
+# 
+# Furthermore, you are not limited to lights on the same bus. You can group
+# lights from different busses together. 
+#===============================================================================
 class FnordCluster():
     
     cluster = None
@@ -166,6 +244,10 @@ class FnordCluster():
         self.cluster = []
         
     
+    #===========================================================================
+    # registerLight
+    # With this function, you can register FnordLights (or FnordClusters)
+    #===========================================================================
     def registerLight(self, light):
         
         if DEBUG:
@@ -173,7 +255,11 @@ class FnordCluster():
         
         self.cluster.append(light)
         
-    
+    #===========================================================================
+    # removeLight
+    # With this function, you can remove FnordLights (or FnordClusters) from
+    # the cluster.
+    #==========================================================================
     def removeLight(self, light):
         
         self.cluster.remove(light)
@@ -182,7 +268,7 @@ class FnordCluster():
     def black(self):
         
         for light in self.cluster:
-            light.black(self.number)
+            light.black()
         
         
     def setRGB(self, r, g, b):
@@ -212,17 +298,73 @@ class FnordCluster():
             light.fade_rgb(r, g, b, step, delay)
                 
         
+#===============================================================================
+# FnordFader
+# This is a solution for a rather specific problem. If you want to fade between
+# some specific colors in an easy way, then is FnordFader the solution for your
+# Problem.
+# You can add as many colors as you like and FnordFader will interpolate
+# between them in the interval [0-1]. 
+#===============================================================================
+class FnordFader():
+    
+    colors = None
+    
+    
+    def __init__(self):
+        self.colors = []
+       
         
+    def addColor(self, color):
+        self.colors.append(color)
+        
+        
+    #===========================================================================
+    # getColor
+    # If no value is specified then a value is randomly choosen.
+    #===========================================================================
+    def getColor(self, value = -1):
+        
+        if value == -1 or value < 0.0 or value > 1.0:
+            value = random.random()
+        
+        position = value * (len(self.colors) - 1)
+        
+        lower = int( floor(position) )
+        upper = int( ceil(position) )
+        amount = position - lower
+        
+        lred, lgreen, lblue = self.colors[lower]
+        hred, hgreen, hblue = self.colors[upper]
+        
+        red = int( lred * amount + hred * (1 - amount) )
+        green = int( lgreen * amount + hgreen * (1 - amount) )
+        blue = int( lblue * amount + hblue * (1 - amount) )
+        
+        return (red, green, blue)
+        
+        
+        
+#===============================================================================
+# FnordLight
+# This is the abstraction of a single FnordLight.
+#===============================================================================
 class FnordLight():
     
     fnordcontroller = None
     number = 255
     
+    # Similar to the bus color holds each FnordLight a light color. 
     red = 0
     green = 0
     blue = 0
     
     
+    #===========================================================================
+    # __init__
+    # Each FnordLight holds a reference to its FnordController in order to
+    # be able to control itself.
+    #===========================================================================
     def __init__(self, fnordcontroller, number):
         
         self.fnordcontroller = fnordcontroller
@@ -257,3 +399,20 @@ class FnordLight():
             print("FnordLight(%s): fade_rgb (%s,%s,%s)" % (self.number, r, g, b) )
 
         self.fnordcontroller.fade_rgb(self.number, r, g, b, step, delay)
+        
+
+
+###############################################################################
+# Helper Functions 
+###############################################################################        
+class FnordHelper():
+    
+    def getRandomColor(self):
+        
+        red = int(random.random() * 255)
+        green = int(random.random() * 255)
+        blue = int(random.random() * 255)
+        
+        return (red, green, blue)
+    
+    
