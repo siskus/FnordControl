@@ -2,7 +2,6 @@
 # -*- coding: utf-8-*-
 
 #         fnordlight server
-# A demo server for interacting with FnordLights via FnordLib
 #
 # (c) by Markus Müller <siskus@gmail.com>
 #
@@ -31,9 +30,9 @@ SERVER_PORT = 8001
 IP_ADRESS = '127.0.0.1'
 BUS_PORT = "/dev/ttyUSB0"
 STEP = 20
-DEBUG = 1
+DEBUG = 0
 
-LIGHTCOUNT = 9
+LIGHTCOUNT = 10
 
 bus = None
 lights = []
@@ -77,7 +76,7 @@ class WorkerThread(Thread):
         for light in self.lights:
             light.fade_rgb(0, 0, 0, 10, 3)
             
-        sleep( random.random() * self.speed )
+        sleep( self.speed )
         
         
     def fadePureRandomColors(self):
@@ -108,7 +107,7 @@ class WorkerThread(Thread):
         for light in self.lights:
             light.fade_rgb(0, 0, 0, 10, 3)
             
-        sleep( random.random() * self.speed )
+        sleep( self.speed )
         
         
     def setFader(self, fader):
@@ -121,9 +120,10 @@ class WorkerThread(Thread):
         for light in self.lights:
             
             red, green, blue = self.fader[self.current_fader].getColor()
-            light.fade_rgb(red, green, blue, 30, 3)
+            step, delay = self.fader[self.current_fader].getStepDelayJitter()
+            light.fade_rgb(red, green, blue, step, delay)
             
-        sleep( random.random() * self.speed )
+        sleep( self.speed )
         
         
     def stroboskop(self):
@@ -212,13 +212,28 @@ class HappyServer(BaseHTTPRequestHandler):
         if action.startswith("fadePureColors"):
             
             worker.setMode(2)
-            worker.setBPM(120)
+            worker.setBPM(240)
             worker.energize()
             
      
         elif action.startswith("black"):
             
             bus.black()
+           
+            
+        elif action.startswith("reset"):
+            
+            bus.reset()
+            
+            
+        elif action.startswith("pgmColorWheel"):
+            
+            bus.start_program(255, 0, [5, 1, 1,  0,  0,  60, 0, 255, 255, 255] )
+            
+            
+        elif action.startswith("pgmReverseColorWheel"):
+            
+            bus.start_program(255, 0, [5, 1, 1,  0,  0,  60, 0, 1, 255, 255] )
             
             
         elif action.startswith("color"):
@@ -231,7 +246,7 @@ class HappyServer(BaseHTTPRequestHandler):
         elif action.startswith("fadeRandomColors"):
                     
             worker.setMode(1)
-            worker.setBPM(120)
+            worker.setBPM(240)
             worker.energize()
             
             
@@ -239,14 +254,14 @@ class HappyServer(BaseHTTPRequestHandler):
                     
             worker.setMode(3)
             worker.setFader(1)
-            worker.setBPM(120)
+            worker.setBPM(480)
             worker.energize()
 
         elif action.startswith("faderFire"):
                     
             worker.setMode(3)
             worker.setFader(0)
-            worker.setBPM(240)
+            worker.setBPM(480)
             worker.energize()
 
         
@@ -254,7 +269,21 @@ class HappyServer(BaseHTTPRequestHandler):
     
             worker.setMode(3)
             worker.setFader(2)
-            worker.setBPM(30)
+            worker.setBPM(1024)
+            worker.energize()
+            
+        elif action.startswith("fader2Warm"):
+    
+            worker.setMode(3)
+            worker.setFader(4)
+            worker.setBPM(480)
+            worker.energize()
+        
+        elif action.startswith("faderIitb"):
+    
+            worker.setMode(3)
+            worker.setFader(3)
+            worker.setBPM(480)
             worker.energize()
 
         elif action.startswith("strobo"):
@@ -280,12 +309,46 @@ class HappyServer(BaseHTTPRequestHandler):
         elif action.startswith("bpm"):
             
             worker.setBPM( int(action.split("/")[1]) )   
-
+            
+        elif action.startswith("apple-touch-icon.png"):
+            
+            self.serveFile("apple-touch-icon.png")
+            return
 
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
         self.end_headers()
         self.wfile.write( self.generateHTMLUI() )
+        
+        
+    def serveFile(self, filename):
+        
+        file = open(filename, 'r')
+        self.send_response(200)
+        self.send_header('Content-type', self.getContentType(filename))
+        self.end_headers()
+        self.wfile.write(file.read())
+        file.close()
+
+      
+    def getContentType(self, filename):
+
+        type = "application/octet-stream"
+    
+        if filename.lower().endswith("avi"):
+            type = 'video/x-msvideo'
+        elif filename.lower().endswith("mkv"):
+            type = 'video/x-matroska'
+        elif filename.lower().endswith("mpg"):
+            type = 'video/mpeg'
+        elif filename.lower().endswith("iso"):
+            type = 'application/x-iso9660-image'
+        elif filename.lower().endswith("png"):
+            type = 'image/png'
+    
+        
+        return type
+
       
     
     def generateHTMLUI(self):
@@ -306,6 +369,8 @@ class HappyServer(BaseHTTPRequestHandler):
         body += "<br />"
         body += """<a href="/faderWarm">Fader Warm</a>"""
         body += "<br />"
+        body += """<a href="/fader2Warm">Fader Warm Low</a>"""
+        body += "<br />"
         body += """<a href="/black">Black</a>"""
         body += "<br />"
         body += """<a href="/strobo">Stroboskop</a>"""
@@ -313,6 +378,12 @@ class HappyServer(BaseHTTPRequestHandler):
         body += """<a href="/faster">Faster</a>"""
         body += "<br />"
         body += """<a href="/slower">Slower</a>"""
+        body += "<br />"
+        body += """<a href="/pgmColorWheel">Color Wheel</a>"""
+        body += "<br />"
+        body += """<a href="/pgmReverseColorWheel">Reverse Color Wheel</a>"""
+        body += "<br />"
+        body += """<a href="/faderIitb">IITB Fader</a>"""
         body += "<br />"
         body += """<a href="/stop">Stop</a>"""
         body += ""
@@ -338,6 +409,14 @@ class HappyServer(BaseHTTPRequestHandler):
         body += """<a href="/color/255/112/255">Light Blue</a>"""
         body += "<br />"
         body += """<a href="/color/255/255/255">White</a>"""
+        body += "<br />"
+        body += """<a href="/color/255/255/150">IITB Full</a>"""
+        body += "<br />"
+        body += """<a href="/color/127/127/75">IITB Half</a>"""
+        body += "<br />"
+        body += """<a href="/color/64/64/32">IITB Quarter</a>"""
+        body += "<br />"
+        body += """<a href="/reset">Reset</a>"""
         body += ""
         body += ""
         body += "</font></div>"
@@ -462,7 +541,7 @@ if len(sys.argv) < 2:
     
 server_type = sys.argv[1]
 
-bus = FnordBus(BUS_PORT)
+bus = FnordBus(BUS_PORT, False)
 helper = FnordHelper()
 
 fader = []
@@ -470,18 +549,38 @@ fader = []
 fire_fader = FnordFader()
 fire_fader.addColor( (0, 0, 80) )
 fire_fader.addColor( (255, 80, 0) )
+fire_fader.setDelay(0)
+fire_fader.setStep(10)
 
 cool_fader = FnordFader()
 cool_fader.addColor( (0, 255, 160) )
 cool_fader.addColor( (0, 135, 0) )
+cool_fader.setDelay(1)
+cool_fader.setStep(1)
 
 warm_fader = FnordFader()
+warm_fader.addColor( (100, 20, 0) )
 warm_fader.addColor( (180, 60, 20) )
-warm_fader.addColor( (180, 60, 20) )
+
+warm2_fader = FnordFader()
+warm2_fader.addColor( (100, 20, 0) )
+warm2_fader.addColor( (60, 20, 0) )
+warm2_fader.addColor( (20, 0, 0) )
+warm2_fader.setDelay(1)
+warm2_fader.setStep(1)
+
+
+iitb_fader = FnordFader()
+iitb_fader.addColor( (127, 127, 75) )
+iitb_fader.addColor( (64, 64, 32) )
+iitb_fader.setDelay(1)
+iitb_fader.setStep(1)
 
 fader.append(fire_fader)
 fader.append(cool_fader)
 fader.append(warm_fader)
+fader.append(iitb_fader)
+fader.append(warm2_fader)
 
 
 for x in range(LIGHTCOUNT):
@@ -509,6 +608,6 @@ except KeyboardInterrupt:
     worker.stop()
     sleep(1)
     server.socket.close()
-    bus.black()
+    #bus.black()
     
     

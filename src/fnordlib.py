@@ -28,7 +28,7 @@ from math import floor, ceil
 LIGHTCOUNT = 20
 
 # If true, enable debug outputs
-DEBUG = 1
+DEBUG = 0
 
 
 #===============================================================================
@@ -56,7 +56,7 @@ class FnordBus:
     
     lights = None
     
-    def __init__(self, serial_port):
+    def __init__(self, serial_port, doReset = True):
         
         self.con = Serial(
             port=serial_port,
@@ -75,9 +75,20 @@ class FnordBus:
         # FnordLight on the bus
         for x in range(LIGHTCOUNT):
             self.lights.append(FnordLight(self, x))
-            
+        
+        if doReset:    
+            self.reset()
+        
+        
+    #===========================================================================
+    # resetBus
+    # Resets the bus
+    #===========================================================================
+    def reset(self):
+        
         self.sync()
         self.stop()
+        
         
     
     #===========================================================================
@@ -206,6 +217,29 @@ class FnordBus:
         self.flush()
         
         self.lock.release()
+        
+        
+    #===========================================================================
+    # start_program
+    # Starts a predefined program
+    #===========================================================================
+    def start_program(self, addr, program, params):
+        
+        self.lock.acquire()
+        
+        self.con.write( chr(addr) )
+        self.con.write( chr(7) )
+        self.con.write( chr(program) )
+        
+        chrcount = 12 - len(params)
+        
+        for param in params:
+            self.con.write( chr(param) )
+            
+        self.zeros(chrcount)
+        self.flush()
+        
+        self.lock.release()
     
     
     #===========================================================================
@@ -296,6 +330,14 @@ class FnordCluster():
 
         for light in self.cluster:
             light.fade_rgb(r, g, b, step, delay)
+            
+            
+    def start_program(self, addr, program, params):
+        
+        for light in self.cluster:
+            light.start_program(addr, program, params)
+        
+        
                 
         
 #===============================================================================
@@ -309,10 +351,14 @@ class FnordCluster():
 class FnordFader():
     
     colors = None
+    delay = 3
+    step = 30
     
     
     def __init__(self):
         self.colors = []
+        self.delay = 3
+        self.step = 30
        
         
     def addColor(self, color):
@@ -342,7 +388,29 @@ class FnordFader():
         blue = int( lblue * amount + hblue * (1 - amount) )
         
         return (red, green, blue)
+    
+    
+    def getStepDelay(self):
         
+        return self.step, self.delay
+    
+    
+    def getStepDelayJitter(self):
+        
+        jitter_step = int( self.step * random.random() ) + 1
+        jitter_delay = int( self.delay * random.random() )
+        
+        return jitter_step, jitter_delay
+        
+    
+    def setStep(self, step):
+   
+        self.step = step
+        
+    
+    def setDelay(self, delay):
+        
+        self.delay = delay
         
         
 #===============================================================================
@@ -399,6 +467,11 @@ class FnordLight():
             print("FnordLight(%s): fade_rgb (%s,%s,%s)" % (self.number, r, g, b) )
 
         self.fnordcontroller.fade_rgb(self.number, r, g, b, step, delay)
+        
+        
+    def start_program(self, addr, program, params):
+        
+        self.fnordcontroller.start_program(self.number, program, params)
         
 
 
