@@ -23,6 +23,7 @@ from serial import Serial, EIGHTBITS, STOPBITS_ONE
 from threading import Lock
 import random
 from math import floor, ceil
+from time import sleep
 
 # Number of lights to be accessible on the bus
 LIGHTCOUNT = 20
@@ -337,28 +338,32 @@ class FnordCluster():
         for light in self.cluster:
             light.start_program(addr, program, params)
         
-        
                 
-        
 #===============================================================================
-# FnordFader
+# FnordFaderBase
 # This is a solution for a rather specific problem. If you want to fade between
 # some specific colors in an easy way, then is FnordFader the solution for your
 # Problem.
 # You can add as many colors as you like and FnordFader will interpolate
 # between them in the interval [0-1]. 
 #===============================================================================
-class FnordFader():
+class FnordFaderBase():
     
     colors = None
-    delay = 3
-    step = 30
+    delay = 0
+    step = 0
+    jitter = 0
+    running = 0
+    wait_factor = 0
     
     
     def __init__(self):
         self.colors = []
-        self.delay = 3
-        self.step = 30
+        self.delay = 0
+        self.step = 0
+        self.jitter = 0
+        self.running = 0
+        self.wait_factor = 0.1
        
         
     def addColor(self, color):
@@ -390,17 +395,23 @@ class FnordFader():
         return (red, green, blue)
     
     
-    def getStepDelay(self):
+    def getStep(self):
         
-        return self.step, self.delay
+        return self.step
+    
+    def getDelay(self):
+        
+        return self.delay
     
     
-    def getStepDelayJitter(self):
+    def getJitter(self):
+                
+        return self.jitter
+    
+    
+    def setJitter(self):
         
-        jitter_step = int( self.step * random.random() ) + 1
-        jitter_delay = int( self.delay * random.random() )
-        
-        return jitter_step, jitter_delay
+        return self.jitter
         
     
     def setStep(self, step):
@@ -411,6 +422,51 @@ class FnordFader():
     def setDelay(self, delay):
         
         self.delay = delay
+        
+    def enable(self):
+        
+        self.running = 1
+        
+        
+    def disable(self):
+        
+        self.running = 0
+        
+        
+    def wait(self):
+        
+        duration = (self.step + self.delay) * self.wait_factor
+        
+        sleep(duration)
+        
+        
+class FnordFaderArray(FnordFaderBase):
+    
+    lights = None
+    fader = None
+    
+    
+    def __init__(self, lights, fader):
+        FnordFaderBase.__init__(self)
+        self.lights = lights
+        self.fader = fader
+        
+        
+    def run(self):
+        
+        self.enable()
+        
+        while self.running:
+            
+            for item in self.array:
+            
+                r, g, b = self.getColor()
+                step, delay = self.getStepDelayWithJitter()
+                item.fade_rgb(r, g, b, step, delay)
+                
+            self.wait()
+                
+            
         
         
 #===============================================================================

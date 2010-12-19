@@ -25,12 +25,17 @@ from threading import Thread
 import sys
 
 SERVER_PORT = 8001
-IP_ADRESS = '192.168.3.100'
+#IP_ADRESS = '192.168.3.100'
+IP_ADRESS = '127.0.0.1'
 BUS_PORT = "/dev/ttyUSB0"
 STEP = 20
 DEBUG = 1
 
 LIGHTCOUNT = 10
+
+bus = None
+worker = None
+helper = None
 
 class  WorkerThread(Thread):
     
@@ -41,19 +46,21 @@ class  WorkerThread(Thread):
         self.bus = bus
         self.command = 0
         
+        self.fader = None
+        
     
     def execute(self, command):
         self.command = command
         
         
-    def start(self):
+    def go(self):
         self.running = 1
         
         
-    def stop(self):
+    def halt(self):
         self.running = 0
         
-    
+        
     def run(self):
         pass
 
@@ -142,12 +149,15 @@ class FnordServer(BaseHTTPRequestHandler):
 
 #bus = FnordBus(BUS_PORT, False)
 helper = FnordHelper()
+worker = WorkerThread(bus)
+worker.daemon = 1
+worker.start()
 
 try:
+    
     print 'Starting FnordServer at %s:%s...' % (IP_ADRESS, SERVER_PORT)
     
     server = HTTPServer((IP_ADRESS, SERVER_PORT), FnordServer)
-    
     server.serve_forever()
     
     
