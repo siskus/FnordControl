@@ -168,6 +168,9 @@ class FnordServer(BaseHTTPRequestHandler):
             # Part 2: Launch thread
             worker.setPayload(fader)
             worker.go()
+            
+            # Part 3: Display UI
+            self.sendHTMLUI()
         
         elif commands[0] == "speed":
             

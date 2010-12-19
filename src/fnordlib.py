@@ -664,9 +664,9 @@ class FnordFaderBase(WorkerBase):
         
     def getStepDelayWithJitter(self):
         
-        jitter_step = self.step + (random.random(self.jitter * self.step)
+        jitter_step = self.step + (random.random()* self.jitter * self.step
                                     - (self.jitter * self.step) / 2)
-        jitter_delay = self.delay + (random.random(self.jitter * self.delay) 
+        jitter_delay = self.delay + (random.random() * self.jitter * self.delay 
                                      - (self.jitter * self.delay) / 2)
         
         if jitter_step < 0:
@@ -694,7 +694,7 @@ class FnordFaderArray(FnordFaderBase):
         
         while self.running:
             
-            for item in self.array:
+            for item in self.lights:
             
                 r, g, b = self.getColor()
                 step, delay = self.getStepDelayWithJitter()
