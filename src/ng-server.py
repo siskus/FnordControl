@@ -18,7 +18,7 @@
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
-from fnordlib import FnordBus, FnordHelper, FnordFader
+from fnordlib import FnordBus, FnordHelper, FnordFaderArray
 from time import sleep
 import random
 from threading import Thread

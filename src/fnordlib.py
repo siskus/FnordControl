@@ -338,6 +338,23 @@ class FnordCluster():
         for light in self.cluster:
             light.start_program(addr, program, params)
         
+               
+# Base class for all FnordWorkers
+class WorkerBase():
+    
+    def enable(self):
+        
+        raise Exception("You need to implement enable!")
+    
+    
+    def disable(self):
+        
+        raise Exception("You need to implement disable!")       
+        
+        
+    def run(self):
+        
+        raise Exception("You need to implement run!")        
                 
 #===============================================================================
 # FnordFaderBase
@@ -347,7 +364,7 @@ class FnordCluster():
 # You can add as many colors as you like and FnordFader will interpolate
 # between them in the interval [0-1]. 
 #===============================================================================
-class FnordFaderBase():
+class FnordFaderBase(WorkerBase):
     
     colors = None
     delay = 0
@@ -423,6 +440,7 @@ class FnordFaderBase():
         
         self.delay = delay
         
+        
     def enable(self):
         
         self.running = 1
@@ -436,9 +454,24 @@ class FnordFaderBase():
     def wait(self):
         
         duration = (self.step + self.delay) * self.wait_factor
-        
         sleep(duration)
         
+        
+    def getStepDelayWithJitter(self):
+        
+        jitter_step = self.step + (random.random(self.jitter * self.step)
+                                    - (self.jitter * self.step) / 2)
+        jitter_delay = self.delay + (random.random(self.jitter * self.delay) 
+                                     - (self.jitter * self.delay) / 2)
+        
+        if jitter_step < 0:
+            jitter_step = 0
+            
+        if jitter_delay < 0:
+            jitter_delay = 0
+        
+        return (jitter_step, jitter_delay)
+    
         
 class FnordFaderArray(FnordFaderBase):
     
@@ -467,7 +500,13 @@ class FnordFaderArray(FnordFaderBase):
             self.wait()
                 
             
-        
+class FnordFaderSingle(FnordFaderArray):
+    
+    def __init__(self, light, fader):
+        lights = []
+        lights.append(light)
+        FnordFaderArray.__init__(self, lights, fader)
+                
         
 #===============================================================================
 # FnordLight
