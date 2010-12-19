@@ -277,7 +277,9 @@ class FnordBusDummy:
     
     lights = None
     
-    def __init__(self, serial_port, doReset = True):
+    def __init__(self, serial_port, doReset = True, debug = True):
+        
+        self.debug = debug
         
         self.con = serial_port
         
@@ -320,14 +322,14 @@ class FnordBusDummy:
     #===========================================================================
     def setRGB(self, r, g, b):
         
-        if DEBUG:
+        if self.debug:
             print("setRGB1 (%s, %s, %s)") % (self.red, self.green, self.blue)
         
         self.red = r
         self.green = g
         self.blue = b
         
-        if DEBUG:
+        if self.debug:
             print("setRGB2 (%s, %s, %s)") % (self.red, self.green, self.blue)
         
         
@@ -337,7 +339,7 @@ class FnordBusDummy:
     #===========================================================================
     def getRGB(self):
         
-        if DEBUG:
+        if self.debug:
             print("getRGB (%s, %s, %s)") % (self.red, self.green, self.blue)
             
         return (self.red, self.green, self.blue) 
@@ -349,7 +351,7 @@ class FnordBusDummy:
     #===========================================================================
     def update(self):
         
-        if DEBUG:
+        if self.debug:
             print("update (%s, %s, %s)") % (self.red, self.green, self.blue)
         
         self.fade_rgb(255, self.red, self.green, self.blue)
@@ -362,7 +364,7 @@ class FnordBusDummy:
     #===========================================================================
     def flush(self):
         
-        if DEBUG:
+        if self.debug:
             print("flushing...")
          
         
@@ -374,7 +376,7 @@ class FnordBusDummy:
         
         self.lock.acquire()
         
-        if DEBUG:
+        if self.debug:
             print("Syncing...")
         
         self.flush()
@@ -388,7 +390,7 @@ class FnordBusDummy:
     #===========================================================================
     def zeros(self, count = 8):
         
-        if DEBUG:
+        if self.debug:
             print("Writing zeros...")
     
         
@@ -401,7 +403,7 @@ class FnordBusDummy:
         
         self.lock.acquire()
         
-        if DEBUG:
+        if self.debug:
             print("fade_rgb: addr:%s r:%s g:%s b:%s step:%s delay:%s" %
                   (addr, r, g, b, step, delay) )
         
@@ -419,7 +421,7 @@ class FnordBusDummy:
         
         self.lock.acquire()
         
-        if DEBUG:
+        if self.debug:
             print("Stop...")
             
         self.zeros(12)
@@ -436,7 +438,7 @@ class FnordBusDummy:
         
         self.lock.acquire()
         
-        if DEBUG:
+        if self.debug:
             print("Starting program %s" % program)
             
         self.zeros(10)
@@ -560,7 +562,12 @@ class WorkerBase():
     def run(self):
         
         raise Exception("You need to implement run!")        
-                
+
+
+    def setSpeed(self):
+        
+        raise Exception("You need to implement setSpeed!")        
+                    
 #===============================================================================
 # FnordFaderBase
 # This is a solution for a rather specific problem. If you want to fade between
@@ -586,6 +593,12 @@ class FnordFaderBase(WorkerBase):
         self.jitter = 0
         self.running = 0
         self.wait_factor = 0.1
+        self.speed = 1.0
+        
+        
+    def setSpeed(self, speed):
+        
+        self.speed = speed
        
         
     def addColor(self, color):
@@ -620,6 +633,7 @@ class FnordFaderBase(WorkerBase):
     def getStep(self):
         
         return self.step
+    
     
     def getDelay(self):
         
@@ -698,6 +712,10 @@ class FnordFaderArray(FnordFaderBase):
             
                 r, g, b = self.getColor()
                 step, delay = self.getStepDelayWithJitter()
+                
+                step *= self.speed
+                delay *= self.speed
+                
                 item.fade_rgb(r, g, b, step, delay)
                 
             self.wait()

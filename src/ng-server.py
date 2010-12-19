@@ -85,6 +85,12 @@ class  WorkerThread(Thread):
                 
             sleep(0.5)
 
+            
+    def setSpeed(self, speed):
+        
+        if not self.command == None:
+            self.command.setSpeed(speed)
+
 
 class FnordServer(BaseHTTPRequestHandler):
     
@@ -170,11 +176,25 @@ class FnordServer(BaseHTTPRequestHandler):
             worker.go()
             
             # Part 3: Display UI
-            self.sendHTMLUI()
+            self.sendHTMLUI("Fader changed to %s" % commands[1])
         
         elif commands[0] == "speed":
             
-            pass
+            try:
+                speed = int(commands[1])
+            except:
+                speed = 100
+            
+            if speed < 25:
+                speed = 25
+            elif speed > 200:
+                speed = 200
+            
+            # Part 1: Change speed
+            worker.setSpeed(speed)
+            
+            # Part 2: Display UI
+            self.sendHTMLUI("Speed changed to %s" % speed)
         
         elif commands[0] == "highlight":
             
@@ -184,11 +204,12 @@ class FnordServer(BaseHTTPRequestHandler):
             self.sendHTMLUI()
 
 
-    def sendHTMLUI(self):
+    def sendHTMLUI(self,  command = "", speed = "", message = "",
+                   title = "Fnord-Control NG"):
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
         self.end_headers()
-        self.wfile.write( self.generateHTMLUI() )
+        self.wfile.write( self.generateHTMLUI(command, speed, message, title) )
         
         
     def serveFile(self, filename):
@@ -219,8 +240,7 @@ class FnordServer(BaseHTTPRequestHandler):
         return type
         
         
-    def generateHTMLUI(self, title = "Fnord-Control NG", command = "",
-                       speed = "", message = ""):
+    def generateHTMLUI(self, command, speed, message, title):
         
         body = ""
         
