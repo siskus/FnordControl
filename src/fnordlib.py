@@ -270,14 +270,17 @@ class FnordCluster():
     
     cluster = None
     
-    red = 0
-    green = 0
-    blue = 0
+#    red = 0
+#    green = 0
+#    blue = 0
     
     
     def __init__(self):
         self.cluster = []
         
+        self.red = 0
+        self.green = 0
+        self.blue = 0
     
     #===========================================================================
     # registerLight
@@ -366,12 +369,12 @@ class WorkerBase():
 #===============================================================================
 class FnordFaderBase(WorkerBase):
     
-    colors = None
-    delay = 0
-    step = 0
-    jitter = 0
-    running = 0
-    wait_factor = 0
+#    colors = None
+#    delay = 0
+#    step = 0
+#    jitter = 0
+#    running = 0
+#    wait_factor = 0
     
     
     def __init__(self):
@@ -475,14 +478,12 @@ class FnordFaderBase(WorkerBase):
         
 class FnordFaderArray(FnordFaderBase):
     
-    lights = None
-    fader = None
+#    lights = None
     
     
-    def __init__(self, lights, fader):
+    def __init__(self, lights):
         FnordFaderBase.__init__(self)
         self.lights = lights
-        self.fader = fader
         
         
     def run(self):

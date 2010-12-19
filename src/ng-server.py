@@ -39,30 +39,50 @@ helper = None
 
 class  WorkerThread(Thread):
     
+#    running = 0
+#    bus = None
+#    command = None
+    
     def __init__(self, bus):
         Thread.__init__(self)
         
         self.running = 0
         self.bus = bus
-        self.command = 0
-        
-        self.fader = None
+        self.command = None
         
     
     def execute(self, command):
+        
+        if not self.command == None:
+            self.command.disable()
+            self.halt()
+            
         self.command = command
         
         
     def go(self):
         self.running = 1
+        self.command.enable()
         
         
     def halt(self):
         self.running = 0
+        self.command.disable()
         
         
     def run(self):
-        pass
+        
+        # Loop forever
+        while 42:
+            
+            while self.running:
+                
+                if self.command == None:
+                    sleep(0.5)
+                else:        
+                    self.command.run()
+                
+            sleep(0.5)
 
 
 class FnordServer(BaseHTTPRequestHandler):
@@ -82,6 +102,72 @@ class FnordServer(BaseHTTPRequestHandler):
             
         elif commands[0] == "apple-touch-icon.png":
             self.serveFile("apple-touch-icon.png")
+
+        elif commands[0] == "one_color":
+            
+            lights = []
+            for i in range(LIGHTCOUNT):
+                lights.append(bus.getFnordLight(i))
+            
+            fader = FnordFaderArray(lights)
+            
+            # Part 1: Configure fader
+            
+            fader.setDelay(2)
+            fader.setStep(1)
+            
+            if commands[1] == "rainbow":
+                
+                fader.addColor( (255, 000, 000) )
+                fader.addColor( (255, 255, 000) )
+                fader.addColor( (000, 255, 000) )
+                fader.addColor( (000, 255, 255) )
+                fader.addColor( (000, 000, 255) )
+                
+            elif commands[1] == "iitb":
+                
+                fader.addColor( (127, 127, 075) )
+                fader.addColor( (064, 064, 032) )
+                
+            elif commands[1] == "fire":
+            
+                fader.addColor( (100, 020, 000) )
+                fader.addColor( (060, 020, 000) )
+                fader.addColor( (020, 000, 000) )
+            
+            elif commands[1] == "black":
+                
+                fader.addColor( (000, 000, 000) )
+                
+            elif commands[1] == "white":
+                
+                fader.addColor( (255, 255, 255) )
+                
+            elif commands[1] == "bnw":
+                
+                fader.addColor( (255, 255, 255) )
+                fader.addColor( (000, 000, 000) )
+                
+            else:
+                
+                fader.addColor( (000, 000, 000) )
+                
+            # Part 2: Launch thread
+            worker.execute(fader)
+            worker.go()
+                
+        
+        elif commands[0] == "xcolors":
+            
+            pass
+        
+        elif commands[0] == "speed":
+            
+            pass
+        
+        elif commands[0] == "highlight":
+            
+            pass
             
         else:
             self.sendHTMLUI()
