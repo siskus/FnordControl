@@ -250,6 +250,208 @@ class FnordBus:
     def black(self, addr = 255):
         
         self.fade_rgb(addr, 0, 0, 0)
+
+#===============================================================================
+# FnordBusDummy
+# =============
+#
+# This is a dummy implementation of a FnordBus for testing purposes
+# This is the the most basic abstraction from a FnordNet-Bus with FnordLights
+# connected.
+# Upon object creation, it will initialize the bus. This means that it will
+# instruct the light to stop fading and it sends a sync signal through the
+# bus.  
+#===============================================================================
+class FnordBusDummy:
+    
+#    con = None
+#    
+#    lock = None
+    
+    # These three variables hold a "bus color". The controller has the ability
+    # to let all the lights on bus display this color. It is controlled via
+    # the appropriate functions (setRGB, getRGB and update)
+    red = 0
+    green = 0
+    blue = 0
+    
+    lights = None
+    
+    def __init__(self, serial_port, doReset = True):
+        
+        self.con = serial_port
+        
+        self.lock = Lock()
+        
+        self.lights = []
+        
+        # The controller creates individual FnordLight objects for each
+        # FnordLight on the bus
+        for x in range(LIGHTCOUNT):
+            self.lights.append(FnordLight(self, x))
+        
+        if doReset:    
+            self.reset()
+        
+        
+    #===========================================================================
+    # resetBus
+    # Resets the bus
+    #===========================================================================
+    def reset(self):
+        
+        self.sync()
+        self.stop()
+        
+        
+    
+    #===========================================================================
+    # getFnordLight
+    # Returns a specific FnordLight from the bus
+    #===========================================================================
+    def getFnordLight(self, number):
+        
+        return self.lights[number]
+    
+    
+    #===========================================================================
+    # setRGB
+    # Sets the "bus color"
+    #===========================================================================
+    def setRGB(self, r, g, b):
+        
+        if DEBUG:
+            print("setRGB1 (%s, %s, %s)") % (self.red, self.green, self.blue)
+        
+        self.red = r
+        self.green = g
+        self.blue = b
+        
+        if DEBUG:
+            print("setRGB2 (%s, %s, %s)") % (self.red, self.green, self.blue)
+        
+        
+    #===========================================================================
+    # getRGB
+    # Return the current "bus color"
+    #===========================================================================
+    def getRGB(self):
+        
+        if DEBUG:
+            print("getRGB (%s, %s, %s)") % (self.red, self.green, self.blue)
+            
+        return (self.red, self.green, self.blue) 
+        
+    
+    #===========================================================================
+    # update
+    # Instructs all FnordLights to fade to the current "bus color"
+    #===========================================================================
+    def update(self):
+        
+        if DEBUG:
+            print("update (%s, %s, %s)") % (self.red, self.green, self.blue)
+        
+        self.fade_rgb(255, self.red, self.green, self.blue)
+           
+        
+        
+    #===========================================================================
+    # flush
+    # Flushes the serial buffer in order to write all the bytes out on the bus.
+    #===========================================================================
+    def flush(self):
+        
+        if DEBUG:
+            print("flushing...")
+         
+        
+    #===========================================================================
+    # sync
+    # Send a sync signal on the bus
+    #===========================================================================
+    def sync(self, addr = 0):
+        
+        self.lock.acquire()
+        
+        if DEBUG:
+            print("Syncing...")
+        
+        self.flush()
+        
+        self.lock.release()
+        
+    
+    #===========================================================================
+    # zeros
+    # Helper function to send zeros over the wire
+    #===========================================================================
+    def zeros(self, count = 8):
+        
+        if DEBUG:
+            print("Writing zeros...")
+    
+        
+    #===========================================================================
+    # fade_rgb
+    # Fade the FnordLight no. addr to the color (r, g, b) with the optional
+    # step and delay.
+    #===========================================================================
+    def fade_rgb(self, addr, r, g, b, step = 5, delay = 0):
+        
+        self.lock.acquire()
+        
+        if DEBUG:
+            print("fade_rgb: addr:%s r:%s g:%s b:%s step:%s delay:%s" %
+                  (addr, r, g, b, step, delay) )
+        
+        self.zeros()
+        self.flush()
+        
+        self.lock.release()
+        
+        
+    #===========================================================================
+    # stop
+    # Stop the fading on the whole bus if no addr is specified.
+    #===========================================================================
+    def stop(self, addr = 255, fading = 1):
+        
+        self.lock.acquire()
+        
+        if DEBUG:
+            print("Stop...")
+            
+        self.zeros(12)
+        self.flush()
+        
+        self.lock.release()
+        
+        
+    #===========================================================================
+    # start_program
+    # Starts a predefined program
+    #===========================================================================
+    def start_program(self, addr, program, params):
+        
+        self.lock.acquire()
+        
+        if DEBUG:
+            print("Starting program %s" % program)
+            
+        self.zeros(10)
+        self.flush()
+        
+        self.lock.release()
+    
+    
+    #===========================================================================
+    # black
+    # Fades the entire bus to black if no addr is specified.
+    #===========================================================================
+    def black(self, addr = 255):
+        
+        self.fade_rgb(addr, 0, 0, 0)
         
     
         
@@ -507,7 +709,7 @@ class FnordFaderSingle(FnordFaderArray):
         lights = []
         lights.append(light)
         FnordFaderArray.__init__(self, lights, fader)
-                
+    
         
 #===============================================================================
 # FnordLight
@@ -515,13 +717,13 @@ class FnordFaderSingle(FnordFaderArray):
 #===============================================================================
 class FnordLight():
     
-    fnordcontroller = None
-    number = 255
+#    fnordcontroller = None
+#    number = 255
     
     # Similar to the bus color holds each FnordLight a light color. 
-    red = 0
-    green = 0
-    blue = 0
+#    red = 0
+#    green = 0
+#    blue = 0
     
     
     #===========================================================================
@@ -533,7 +735,11 @@ class FnordLight():
         
         self.fnordcontroller = fnordcontroller
         self.number = number
-
+        
+        self.red = 0
+        self.green = 0
+        self.blue = 0
+        
 
     def black(self):
         

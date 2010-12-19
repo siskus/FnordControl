@@ -18,7 +18,8 @@
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
-from fnordlib import FnordBus, FnordHelper, FnordFaderArray
+from fnordlib import FnordBus, FnordHelper, FnordFaderArray, FnordCluster
+from fnordlib import FnordBusDummy
 from time import sleep
 import random
 from threading import Thread
@@ -51,7 +52,7 @@ class  WorkerThread(Thread):
         self.command = None
         
     
-    def execute(self, command):
+    def setPayload(self, command):
         
         if not self.command == None:
             self.command.disable()
@@ -103,12 +104,24 @@ class FnordServer(BaseHTTPRequestHandler):
         elif commands[0] == "apple-touch-icon.png":
             self.serveFile("apple-touch-icon.png")
 
-        elif commands[0] == "one_color":
+        elif commands[0] == "one_color" or commands[0] == "xcolors":
             
             lights = []
-            for i in range(LIGHTCOUNT):
-                lights.append(bus.getFnordLight(i))
             
+            if commands[0] == "one_color":
+                
+                for i in range(LIGHTCOUNT):
+                    lights.append(bus.getFnordLight(i))
+                    
+            else:
+                
+                cluster = FnordCluster()
+                
+                for i in range(LIGHTCOUNT):
+                    cluster.registerLight(bus.getFnordLight(i))
+                    
+                lights.append(cluster)
+                
             fader = FnordFaderArray(lights)
             
             # Part 1: Configure fader
@@ -153,13 +166,8 @@ class FnordServer(BaseHTTPRequestHandler):
                 fader.addColor( (000, 000, 000) )
                 
             # Part 2: Launch thread
-            worker.execute(fader)
+            worker.setPayload(fader)
             worker.go()
-                
-        
-        elif commands[0] == "xcolors":
-            
-            pass
         
         elif commands[0] == "speed":
             
@@ -234,8 +242,11 @@ class FnordServer(BaseHTTPRequestHandler):
 # public static void main ;-)
 
 #bus = FnordBus(BUS_PORT, False)
+bus = FnordBusDummy(BUS_PORT, False)
+
 helper = FnordHelper()
 worker = WorkerThread(bus)
+
 worker.daemon = 1
 worker.start()
 
