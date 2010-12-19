@@ -106,10 +106,10 @@ class FnordServer(BaseHTTPRequestHandler):
         
         
         if commands[0] == "default.css":
-            self.serveFile("default.css")
+            self.serveFile("Ressources/default.css")
             
         elif commands[0] == "apple-touch-icon.png":
-            self.serveFile("apple-touch-icon.png")
+            self.serveFile("Ressources/apple-touch-icon.png")
 
         elif commands[0] == "one_color" or commands[0] == "xcolors":
             
@@ -249,7 +249,7 @@ class FnordServer(BaseHTTPRequestHandler):
         
         body = ""
         
-        filename = "index.html"
+        filename = "Ressources/index.html"
         
         file = open(filename, 'r')
         

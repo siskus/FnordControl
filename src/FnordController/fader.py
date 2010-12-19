@@ -27,7 +27,7 @@ from time import sleep
 
 sys.path.append('..');
 
-from fnordlib import WorkerBase
+from FnordLib import WorkerBase
 
 
 #===============================================================================
