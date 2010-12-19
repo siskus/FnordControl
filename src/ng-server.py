@@ -42,7 +42,11 @@ class FnordServer(BaseHTTPRequestHandler):
         
         action = self.path.strip("/")
         
-        # CSS ausliefer
+        if DEBUG:
+            print("Path: %s" % action)
+        
+        commands = action.split("/")
+        
         
         if(action == "default.css"):
             self.serveFile("default.css")
@@ -83,7 +87,8 @@ class FnordServer(BaseHTTPRequestHandler):
         return type
         
         
-    def generateHTMLUI(self):
+    def generateHTMLUI(self, title = "Fnord-Control NG", command = "",
+                       speed = "", message = ""):
         
         body = ""
         
@@ -95,6 +100,13 @@ class FnordServer(BaseHTTPRequestHandler):
             body += line
             
         file.close()
+        
+        # Replace special values in HTML File
+        body = body.replace("#TITLE#", title)
+        body = body.replace("#COMMAND#", command)
+        body = body.replace("#SPEED#", speed)
+        body = body.replace("#MESSAGE#", message)
+        
         
         return body
     
