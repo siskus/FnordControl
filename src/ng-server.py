@@ -33,7 +33,29 @@ DEBUG = 1
 LIGHTCOUNT = 10
 
 class  WorkerThread(Thread):
-    pass
+    
+    def __init__(self, bus):
+        Thread.__init__(self)
+        
+        self.running = 0
+        self.bus = bus
+        self.command = 0
+        
+    
+    def execute(self, command):
+        self.command = command
+        
+        
+    def start(self):
+        self.running = 1
+        
+        
+    def stop(self):
+        self.running = 0
+        
+    
+    def run(self):
+        pass
 
 
 class FnordServer(BaseHTTPRequestHandler):
@@ -48,15 +70,21 @@ class FnordServer(BaseHTTPRequestHandler):
         commands = action.split("/")
         
         
-        if(action == "default.css"):
+        if commands[0] == "default.css":
             self.serveFile("default.css")
             
+        elif commands[0] == "apple-touch-icon.png":
+            self.serveFile("apple-touch-icon.png")
+            
         else:
-        
-            self.send_response(200)
-            self.send_header('Content-type', 'text/html')
-            self.end_headers()
-            self.wfile.write( self.generateHTMLUI() )
+            self.sendHTMLUI()
+
+
+    def sendHTMLUI(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+        self.wfile.write( self.generateHTMLUI() )
         
         
     def serveFile(self, filename):
@@ -107,8 +135,8 @@ class FnordServer(BaseHTTPRequestHandler):
         body = body.replace("#SPEED#", speed)
         body = body.replace("#MESSAGE#", message)
         
-        
         return body
+    
     
 # public static void main ;-)
 
