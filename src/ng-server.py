@@ -18,8 +18,9 @@
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
-from fnordlib import FnordBus, FnordHelper, FnordFaderArray, FnordCluster
-from fnordlib import FnordBusDummy
+from FnordLib import FnordBus, FnordHelper, FnordCluster
+from FnordController.fader import FnordFaderArray
+from FnordLib import FnordBusDummy
 from time import sleep
 import random
 from threading import Thread
@@ -198,9 +199,13 @@ class FnordServer(BaseHTTPRequestHandler):
         
         elif commands[0] == "highlight":
             
-            pass
+            if commands[1] == "fireworks":
+                pass
+            
+            self.sendHTMLUI("Switched to %s" % commands[1])
             
         else:
+            
             self.sendHTMLUI()
 
 
