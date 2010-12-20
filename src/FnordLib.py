@@ -100,6 +100,15 @@ class FnordBus:
     
     
     #===========================================================================
+    # getFnordLights
+    # Returns all FnordLights from the bus
+    #===========================================================================
+    def getFnordLights(self):
+        
+        return self.lights
+    
+    
+    #===========================================================================
     # setRGB
     # Sets the "bus color"
     #===========================================================================
@@ -312,6 +321,15 @@ class FnordBusDummy:
     def getFnordLight(self, number):
         
         return self.lights[number]
+    
+    
+    #===========================================================================
+    # getFnordLights
+    # Returns all FnordLights from the bus
+    #===========================================================================
+    def getFnordLights(self):
+        
+        return self.lights
     
     
     #===========================================================================

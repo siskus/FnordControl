@@ -20,6 +20,7 @@
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from FnordLib import FnordBus, FnordHelper, FnordCluster
 from FnordController.fader import FnordFaderArray
+from FnordController.fireworks import FireWorks
 from FnordLib import FnordBusDummy
 from time import sleep
 import random
@@ -200,7 +201,10 @@ class FnordServer(BaseHTTPRequestHandler):
         elif commands[0] == "highlight":
             
             if commands[1] == "fireworks":
-                pass
+                
+                fireworks = FireWorks( bus.getFnordLights() )
+                worker.setPayload(fireworks)
+                
             
             self.sendHTMLUI("Switched to %s" % commands[1])
             

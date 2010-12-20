@@ -157,6 +157,7 @@ class FnordFaderBase(WorkerBase):
 class FnordFaderArray(FnordFaderBase):
     
     def __init__(self, lights):
+        
         FnordFaderBase.__init__(self)
         self.lights = lights
         
