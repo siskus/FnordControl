@@ -181,7 +181,7 @@ class FnordFaderArray(FnordFaderBase):
                 item.fade_rgb(r, g, b, self.step, self.delay)
                 
             #self.wait()
-            sleep(0.5)
+            sleep(0.5 * random.random() * self.speed)
                 
             
 class FnordFaderSingle(FnordFaderArray):

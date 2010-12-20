@@ -95,13 +95,14 @@ class FireWorks(WorkerBase):
         # Part III: Let the lights slowly fade
         
         for light in affected_lights:
+            pass
             
             #light.fade_rgb(0, 0, 0, self.step, self.delay)
             
-            self.lights[lower_bound].fade_rgb(0, 0, 0, self.step, self.delay)
-            self.lights[upper_bound].fade_rgb(0, 0, 0, self.step, self.delay)
+        self.lights[lower_bound].fade_rgb(0, 0, 0, self.step, self.delay)
+        self.lights[upper_bound].fade_rgb(0, 0, 0, self.step, self.delay)
             
-        sleep(0.05)
+        sleep( random.random() * 0.2 * self.speed)
     
     
     def run(self):
@@ -123,7 +124,7 @@ class FireWorks(WorkerBase):
             # Part III: Wait
             
             #self.wait()
-            sleep(0.5)
+            sleep( random.random() * 0.5 * self.speed)
             
             
     def wait(self):

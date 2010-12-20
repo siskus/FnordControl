@@ -191,12 +191,14 @@ class FnordServer(BaseHTTPRequestHandler):
                 speed = 25
             elif speed > 200:
                 speed = 200
+                
+            speed = 100.0 / speed
             
             # Part 1: Change speed
             worker.setSpeed(speed)
             
             # Part 2: Display UI
-            self.sendHTMLUI("Speed changed to %s" % speed)
+            self.sendHTMLUI("Speed changed to %s" % (1 / speed))
         
         elif commands[0] == "highlight":
             
