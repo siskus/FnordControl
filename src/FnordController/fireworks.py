@@ -36,25 +36,7 @@ class FireWorks(WorkerBase):
     
     
     def __init__(self, lights):
-        
-        self.speed = 1.0
-        self.running = 0
-        self.step = 1
-        self.delay = 0
-        self.wait_factor = 1.0
-        self.lights = lights
-        self.light_count = len(self.lights)
-        self.fnord_helper = FnordHelper()
-        
-    
-    def enable(self):
-        
-        self.running = 1
-    
-    
-    def disable(self):
-    
-        self.running = 0
+        WorkerBase.__init__(self, lights)
     
     
     def selectOrigin(self):
@@ -125,13 +107,4 @@ class FireWorks(WorkerBase):
             
             self.wait(0.5)
             
-            
-    def wait(self, time):
-        
-        sleep( random.random() * time * self.speed )
-    
-    
-    def setSpeed(self, speed):
-        
-        self.speed = speed
         

@@ -21,34 +21,17 @@
 
 import sys
 
-import random
-from time import sleep
-
 sys.path.append('..');
 from FnordLib import WorkerBase
 
 class Skel(WorkerBase):
     
         
-    def enable(self):
-        
-        #TODO
-        pass
+    def __init__(self, lights):
+        WorkerBase.__init__(self, lights)
     
-    
-    def disable(self):
-        
-        #TODO
-        pass
-        
         
     def run(self):
-        
-        #TODO
-        pass
-
-
-    def setSpeed(self):
         
         #TODO
         pass

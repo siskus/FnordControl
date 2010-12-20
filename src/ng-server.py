@@ -21,6 +21,7 @@ from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from FnordLib import FnordBus, FnordHelper, FnordCluster
 from FnordController.fader import FnordFaderArray
 from FnordController.fireworks import FireWorks
+from FnordController.knightrider import KnightRider
 from FnordLib import FnordBusDummy
 from time import sleep
 import random
@@ -224,6 +225,12 @@ class FnordServer(BaseHTTPRequestHandler):
                 
                 fireworks = FireWorks( bus.getFnordLights() )
                 worker.setPayload(fireworks)
+                worker.go()
+                
+            elif commands[1] == "knightrider":
+                
+                kitt = KnightRider( bis.getFnordLights() )
+                worker.setPayload(kitt)
                 worker.go()
                 
             

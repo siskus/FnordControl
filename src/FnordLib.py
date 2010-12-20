@@ -22,6 +22,7 @@
 from serial import Serial, EIGHTBITS, STOPBITS_ONE
 from threading import Lock
 import random
+from time import sleep
 
 # Number of lights to be accessible on the bus
 LIGHTCOUNT = 10
@@ -171,7 +172,7 @@ class FnordBus:
         for x in range(15):
             self.con.write( chr(27) )
             
-        self.con.write( chr(addr) )
+        self.con.write( chr( int(addr) ) )
         
         self.flush()
         
@@ -184,7 +185,7 @@ class FnordBus:
     #===========================================================================
     def zeros(self, count = 8):
         
-        for x in range(count):
+        for x in range( int(count) ):
             self.con.write( chr(0) )
     
         
@@ -197,13 +198,13 @@ class FnordBus:
         
         self.lock.acquire()
         
-        self.con.write( chr(addr) )
+        self.con.write( chr( int(addr) ) )
         self.con.write(chr(1) )
-        self.con.write( chr(step) )
-        self.con.write( chr(delay) )
-        self.con.write( chr(r) )
-        self.con.write( chr(g) )
-        self.con.write( chr(b) )
+        self.con.write( chr( int(step) ) )
+        self.con.write( chr( int(delay) ) )
+        self.con.write( chr( int(r) ) )
+        self.con.write( chr( int(g) ) )
+        self.con.write( chr( int(b) ) )
         self.zeros()
         self.flush()
         
@@ -218,9 +219,9 @@ class FnordBus:
         
         self.lock.acquire()
         
-        self.con.write( chr(addr) )
+        self.con.write( chr( int(addr) ) )
         self.con.write( chr(8) )
-        self.con.write( chr(fading) )
+        self.con.write( chr( int(fading) ) )
         self.zeros(12)
         self.flush()
         
@@ -235,14 +236,14 @@ class FnordBus:
         
         self.lock.acquire()
         
-        self.con.write( chr(addr) )
+        self.con.write( chr( int(addr) ) )
         self.con.write( chr(7) )
-        self.con.write( chr(program) )
+        self.con.write( chr( int(program) ) )
         
         chrcount = 12 - len(params)
         
         for param in params:
-            self.con.write( chr(param) )
+            self.con.write( chr( int(param) ) )
             
         self.zeros(chrcount)
         self.flush()
@@ -565,25 +566,41 @@ class FnordCluster():
 # Base class for all FnordWorkers
 class WorkerBase():
     
+    def __init__(self, lights):
+    
+        self.speed = 1.0
+        self.running = 0
+        self.step = 1
+        self.delay = 0
+        self.wait_factor = 1.0
+        self.lights = lights
+        self.light_count = len(self.lights)
+        self.fnord_helper = FnordHelper()
+        
+        
     def enable(self):
         
-        raise Exception("You need to implement enable!")
+        self.running = 1
     
     
     def disable(self):
         
-        raise Exception("You need to implement disable!")       
+        self.running = 0     
+        
+        
+    def setSpeed(self, speed):
+        
+        self.speed = speed
+        
+                
+    def wait(self, time):
+        
+        sleep( random.random() * time * self.speed )
         
         
     def run(self):
         
         raise Exception("You need to implement run!")        
-
-
-    def setSpeed(self):
-        
-        raise Exception("You need to implement setSpeed!")        
-                    
 
         
 #===============================================================================
