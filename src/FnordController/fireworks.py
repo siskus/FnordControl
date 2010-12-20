@@ -102,7 +102,7 @@ class FireWorks(WorkerBase):
         self.lights[lower_bound].fade_rgb(0, 0, 0, self.step, self.delay)
         self.lights[upper_bound].fade_rgb(0, 0, 0, self.step, self.delay)
             
-        sleep( random.random() * 0.2 * self.speed)
+        self.wait(0.2)
     
     
     def run(self):
@@ -123,15 +123,12 @@ class FireWorks(WorkerBase):
                 
             # Part III: Wait
             
-            #self.wait()
-            sleep( random.random() * 0.5 * self.speed)
+            self.wait(0.5)
             
             
-    def wait(self):
+    def wait(self, time):
         
-        duration = (self.step + self.delay) * self.wait_factor
-        #sleep(duration)
-        sleep(0.5)
+        sleep( random.random() * time * self.speed )
     
     
     def setSpeed(self, speed):
