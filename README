@@ -4,6 +4,9 @@ Contents
 This repository contains a library written in python for communicating with
 fnordlights and a server for controlling the lights (ng-server.py).
 
+Please change the IP-Address and Port to suit your needs before starting the
+server.
+
 
 License
 =======
@@ -11,3 +14,8 @@ License
 Each file contains a header, which states the author(s) and license for that
 file.  Most code is licensed as GPL (version 3).  The text for this license can
 be found in the file COPYING.
+
+
+TODO
+====
+Give the controllers the possibility to display their own menu

@@ -23,7 +23,6 @@ import sys
 
 import random
 from math import floor, ceil
-from time import sleep
 
 sys.path.append('..');
 
@@ -47,15 +46,9 @@ class FnordFaderBase(WorkerBase):
 #    running = 0
 #    wait_factor = 0
     
-    
-    def __init__(self):
+    def __init__(self, lights):
+        WorkerBase.__init__(self, lights)
         self.colors = []
-        self.delay = 0
-        self.step = 1
-        self.jitter = 1
-        self.running = 0
-        self.wait_factor = 0.1
-        self.speed = 1.0
         
         
     def setSpeed(self, speed):
@@ -120,45 +113,12 @@ class FnordFaderBase(WorkerBase):
     def setDelay(self, delay):
         
         self.delay = delay
-        
-        
-    def enable(self):
-        
-        self.running = 1
-        
-        
-    def disable(self):
-        
-        self.running = 0
-        
-        
-    def wait(self, time):
-        
-        sleep( random.random() * time * self.speed )
-        
-        
-    def getStepDelayWithJitter(self):
-        
-        jitter_step = self.step + (random.random()* self.jitter * self.step
-                                    - (self.jitter * self.step) / 2)
-        jitter_delay = self.delay + (random.random() * self.jitter * self.delay 
-                                     - (self.jitter * self.delay) / 2)
-        
-        if jitter_step < 0:
-            jitter_step = 0
-            
-        if jitter_delay < 0:
-            jitter_delay = 0
-        
-        return (jitter_step, jitter_delay)
     
         
 class FnordFaderArray(FnordFaderBase):
     
     def __init__(self, lights):
-        
-        FnordFaderBase.__init__(self)
-        self.lights = lights
+        FnordFaderBase.__init__(self, lights)
         
         
     def run(self):
@@ -170,12 +130,6 @@ class FnordFaderArray(FnordFaderBase):
             for item in self.lights:
             
                 r, g, b = self.getColor()
-                step, delay = self.getStepDelayWithJitter()
-                
-                step *= self.speed
-                delay *= self.speed
-                
-                #print("fade_rgb: step:%s delay:%s" % (self.step, self.delay))
                 
                 item.fade_rgb(r, g, b, self.step, self.delay)
                 

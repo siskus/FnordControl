@@ -22,6 +22,7 @@ from FnordLib import FnordBus, FnordHelper, FnordCluster
 from FnordController.fader import FnordFaderArray
 from FnordController.fireworks import FireWorks
 from FnordController.knightrider import KnightRider
+from FnordController.xmas import XMas
 from FnordLib import FnordBusDummy
 from time import sleep
 import random
@@ -144,7 +145,7 @@ class FnordServer(BaseHTTPRequestHandler):
                 fader.addColor( (000, 000, 255) )          
                 fader.setDelay(0)
                 fader.setStep(1)
-                fader.setSpeed(1.0)
+                fader.setSpeed(10)
                 
             elif commands[1] == "iitb":
                 
@@ -160,8 +161,8 @@ class FnordServer(BaseHTTPRequestHandler):
                 fader.addColor( (060, 020, 000) )
                 fader.addColor( (020, 000, 000) )
                 fader.setDelay(0)
-                fader.setStep(1)
-                fader.setSpeed(1.0)
+                fader.setStep(10)
+                fader.setSpeed(2.0)
             
             elif commands[1] == "black":
                 
@@ -223,14 +224,22 @@ class FnordServer(BaseHTTPRequestHandler):
             
             if commands[1] == "fireworks":
                 
-                fireworks = FireWorks( bus.getFnordLights() )
-                worker.setPayload(fireworks)
+                controller = FireWorks( bus.getFnordLights() )
+                worker.setPayload(controller)
                 worker.go()
+
                 
             elif commands[1] == "knightrider":
                 
-                kitt = KnightRider( bis.getFnordLights() )
-                worker.setPayload(kitt)
+                controller = KnightRider( bis.getFnordLights() )
+                worker.setPayload(controller)
+                worker.go()
+
+                
+            elif commands[1] == "xmas":
+                
+                controller = XMas( bis.getFnordLights() )
+                worker.setPayload(controller)
                 worker.go()
                 
             
