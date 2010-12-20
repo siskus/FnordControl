@@ -22,7 +22,7 @@
 import sys
 
 import random
-from math import floor, ceil
+from math import floor
 from time import sleep
 
 sys.path.append('..');
@@ -32,7 +32,7 @@ from FnordLib import WorkerBase, FnordHelper
 
 class FireWorks(WorkerBase):
     
-    LIGHT_DIVERSITY = 5
+    LIGHT_DIVERSITY = 3
     
     
     def __init__(self, lights):
@@ -64,7 +64,7 @@ class FireWorks(WorkerBase):
         return origin
     
     
-    def spreadLight(self, origin, iteration):
+    def spreadLight(self, origin, colors, iteration):
         
         # Part I: Selecting the affected lights
         
@@ -85,15 +85,23 @@ class FireWorks(WorkerBase):
             
         # Part II: Turning the lights on
         
-        r, g, b = self.fnord_helper.getRandomColor()
+        r, g, b = colors
         
-        for light in affected_lights:
-            light.fade_rgb(r, g, b, 255, 0)
+        #for light in affected_lights:
+        #    light.fade_rgb(r, g, b, 50, 0)
+        self.lights[lower_bound].fade_rgb(r, g, b, 50, 0)
+        self.lights[upper_bound].fade_rgb(r, g, b, 50, 0)
         
         # Part III: Let the lights slowly fade
         
         for light in affected_lights:
-            light.fade_rgb(r, g, b, self.step, self.delay)
+            
+            #light.fade_rgb(0, 0, 0, self.step, self.delay)
+            
+            self.lights[lower_bound].fade_rgb(0, 0, 0, self.step, self.delay)
+            self.lights[upper_bound].fade_rgb(0, 0, 0, self.step, self.delay)
+            
+        sleep(0.05)
     
     
     def run(self):
@@ -107,18 +115,22 @@ class FireWorks(WorkerBase):
             
             # Part II: Spread the light
             
+            colors = self.fnord_helper.getRandomColor()
+            
             for i in range(self.LIGHT_DIVERSITY):
-                self.spreadLight(origin, i)
+                self.spreadLight(origin, colors, i)
                 
             # Part III: Wait
             
-            self.wait()
+            #self.wait()
+            sleep(0.5)
             
             
     def wait(self):
         
         duration = (self.step + self.delay) * self.wait_factor
-        sleep(duration)
+        #sleep(duration)
+        sleep(0.5)
     
     
     def setSpeed(self, speed):

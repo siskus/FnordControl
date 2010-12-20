@@ -29,9 +29,9 @@ import sys
 
 SERVER_PORT = 8001
 #IP_ADRESS = '192.168.3.100'
-IP_ADRESS = '127.0.0.1'
+IP_ADRESS = '192.168.1.195'
+#IP_ADRESS = '127.0.0.1'
 BUS_PORT = "/dev/ttyUSB0"
-STEP = 20
 DEBUG = 1
 
 LIGHTCOUNT = 10
@@ -116,7 +116,7 @@ class FnordServer(BaseHTTPRequestHandler):
             
             lights = []
             
-            if commands[0] == "one_color":
+            if commands[0] == "xcolors":
                 
                 for i in range(LIGHTCOUNT):
                     lights.append(bus.getFnordLight(i))
@@ -134,7 +134,7 @@ class FnordServer(BaseHTTPRequestHandler):
             
             # Part 1: Configure fader
             
-            fader.setDelay(2)
+            fader.setDelay(0)
             fader.setStep(1)
             
             if commands[1] == "rainbow":
@@ -274,8 +274,8 @@ class FnordServer(BaseHTTPRequestHandler):
     
 # public static void main ;-)
 
-#bus = FnordBus(BUS_PORT, False)
-bus = FnordBusDummy(BUS_PORT, False)
+bus = FnordBus(BUS_PORT)
+#bus = FnordBusDummy(BUS_PORT)
 
 helper = FnordHelper()
 worker = WorkerThread(bus)

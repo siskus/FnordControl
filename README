@@ -2,7 +2,7 @@ Contents
 ========
 
 This repository contains a library written in python for communicating with
-fnordlights.
+fnordlights and a server for controlling the lights (ng-server.py).
 
 
 License

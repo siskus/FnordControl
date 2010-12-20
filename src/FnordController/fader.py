@@ -51,8 +51,8 @@ class FnordFaderBase(WorkerBase):
     def __init__(self):
         self.colors = []
         self.delay = 0
-        self.step = 0
-        self.jitter = 0
+        self.step = 25
+        self.jitter = 1
         self.running = 0
         self.wait_factor = 0.1
         self.speed = 1.0
@@ -176,9 +176,12 @@ class FnordFaderArray(FnordFaderBase):
                 step *= self.speed
                 delay *= self.speed
                 
-                item.fade_rgb(r, g, b, step, delay)
+                #print("fade_rgb: step:%s delay:%s" % (self.step, self.delay))
                 
-            self.wait()
+                item.fade_rgb(r, g, b, self.step, self.delay)
+                
+            #self.wait()
+            sleep(0.5)
                 
             
 class FnordFaderSingle(FnordFaderArray):
