@@ -204,6 +204,7 @@ class FnordServer(BaseHTTPRequestHandler):
                 
                 fireworks = FireWorks( bus.getFnordLights() )
                 worker.setPayload(fireworks)
+                worker.go()
                 
             
             self.sendHTMLUI("Switched to %s" % commands[1])

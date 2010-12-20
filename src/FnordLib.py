@@ -24,7 +24,7 @@ from threading import Lock
 import random
 
 # Number of lights to be accessible on the bus
-LIGHTCOUNT = 20
+LIGHTCOUNT = 10
 
 # If true, enable debug outputs
 DEBUG = 0

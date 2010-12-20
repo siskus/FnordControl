@@ -44,6 +44,7 @@ class FireWorks(WorkerBase):
         self.wait_factor = 1.0
         self.lights = lights
         self.light_count = len(self.lights)
+        self.fnord_helper = FnordHelper()
         
     
     def enable(self):
@@ -84,7 +85,7 @@ class FireWorks(WorkerBase):
             
         # Part II: Turning the lights on
         
-        r, g, b = FnordHelper.getRandomColor()
+        r, g, b = self.fnord_helper.getRandomColor()
         
         for light in affected_lights:
             light.fade_rgb(r, g, b, 255, 0)
