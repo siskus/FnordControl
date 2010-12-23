@@ -597,8 +597,8 @@ class WorkerBase():
         
         delay = random.random() * time * self.speed
         
-        if DEBUG:
-            print("Waiting for %s seconds" % delay)
+        #if DEBUG:
+        print("Waiting for %s seconds" % delay)
         
         sleep(delay)
         

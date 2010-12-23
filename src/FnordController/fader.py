@@ -23,6 +23,7 @@ import sys
 
 import random
 from math import floor, ceil
+from time import sleep
 
 sys.path.append('..');
 
@@ -93,16 +94,6 @@ class FnordFaderBase(WorkerBase):
     def getDelay(self):
         
         return self.delay
-    
-    
-    def getJitter(self):
-                
-        return self.jitter
-    
-    
-    def setJitter(self):
-        
-        return self.jitter
         
     
     def setStep(self, step):
@@ -119,7 +110,18 @@ class FnordFaderArray(FnordFaderBase):
     
     def __init__(self, lights):
         FnordFaderBase.__init__(self, lights)
+        self.random = 1
         
+        
+    def enableRandom(self):
+        
+        self.random = 1
+
+
+    def disableRandom(self):
+        
+        self.random = 0
+            
         
     def run(self):
         
@@ -132,8 +134,14 @@ class FnordFaderArray(FnordFaderBase):
                 r, g, b = self.getColor()
                 
                 item.fade_rgb(r, g, b, self.step, self.delay)
+            
+            if self.random:
+                    
+                self.wait(0.5)
                 
-            self.wait(0.5)
+            else:
+                
+                sleep(0.5 * self.speed)
                 
             
 class FnordFaderSingle(FnordFaderArray):

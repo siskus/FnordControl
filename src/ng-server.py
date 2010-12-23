@@ -21,7 +21,6 @@ from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from FnordLib import FnordBus, FnordHelper, FnordCluster
 from FnordController.fader import FnordFaderArray
 from FnordController.fireworks import FireWorks
-from FnordController.knightrider import KnightRider
 from FnordController.xmas import XMas
 from FnordLib import FnordBusDummy
 from time import sleep
@@ -186,6 +185,18 @@ class FnordServer(BaseHTTPRequestHandler):
                 fader.setStep(1)
                 fader.setSpeed(1.0)
                 
+            elif commands[1] == "disco":
+                
+                fader.addColor( (255, 000, 000) )
+                fader.addColor( (255, 255, 000) )
+                fader.addColor( (000, 255, 000) )
+                fader.addColor( (000, 255, 255) )
+                fader.addColor( (000, 000, 255) )          
+                fader.setDelay(0)
+                fader.setStep(50)
+                fader.setSpeed(0.25)
+                fader.disableRandom()
+                
             else:
                 
                 fader.addColor( (000, 000, 000) )
@@ -228,17 +239,9 @@ class FnordServer(BaseHTTPRequestHandler):
                 worker.setPayload(controller)
                 worker.go()
 
+            elif commands[1] == "x-mas":
                 
-            elif commands[1] == "knightrider":
-                
-                controller = KnightRider( bis.getFnordLights() )
-                worker.setPayload(controller)
-                worker.go()
-
-                
-            elif commands[1] == "xmas":
-                
-                controller = XMas( bis.getFnordLights() )
+                controller = XMas( bus.getFnordLights() )
                 worker.setPayload(controller)
                 worker.go()
                 

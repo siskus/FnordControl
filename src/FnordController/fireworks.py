@@ -23,11 +23,10 @@ import sys
 
 import random
 from math import floor
-from time import sleep
 
 sys.path.append('..');
 
-from FnordLib import WorkerBase, FnordHelper
+from FnordLib import WorkerBase
 
 
 class FireWorks(WorkerBase):
@@ -75,11 +74,6 @@ class FireWorks(WorkerBase):
         self.lights[upper_bound].fade_rgb(r, g, b, 50, 0)
         
         # Part III: Let the lights slowly fade
-        
-        for light in affected_lights:
-            pass
-            
-            #light.fade_rgb(0, 0, 0, self.step, self.delay)
             
         self.lights[lower_bound].fade_rgb(0, 0, 0, self.step, self.delay)
         self.lights[upper_bound].fade_rgb(0, 0, 0, self.step, self.delay)
