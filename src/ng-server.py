@@ -106,157 +106,166 @@ class FnordServer(BaseHTTPRequestHandler):
         
         commands = action.split("/")
         
+        try:
         
-        if commands[0] == "default.css":
-            self.serveFile("Ressources/default.css")
-            
-        elif commands[0] == "apple-touch-icon.png":
-            self.serveFile("Ressources/apple-touch-icon.png")
-
-        elif commands[0] == "one_color" or commands[0] == "xcolors":
-            
-            lights = []
-            
-            if commands[0] == "xcolors":
+            if commands[0] == "default.css":
+                self.serveFile("Ressources/default.css")
                 
-                for i in range(len(lightchain)):
-                    lights.append(lightchain[i])
+            elif commands[0] == "apple-touch-icon.png":
+                self.serveFile("Ressources/apple-touch-icon.png")
+    
+            elif commands[0] == "one_color" or commands[0] == "xcolors":
+                
+                lights = []
+                
+                if commands[0] == "xcolors":
                     
+                    for i in range(len(lightchain)):
+                        lights.append(lightchain[i])
+                        
+                else:
+                    
+                    cluster = FnordCluster()
+                    
+                    for i in range(len(lightchain)):
+                        cluster.registerLight(lightchain[i])
+                        
+                    lights.append(cluster)
+                    
+                fader = FnordFaderArray(lights)
+                
+                # Part 1: Configure fader
+                
+                if commands[1] == "rainbow":
+                    
+                    fader.addColor( (255, 000, 000) )
+                    fader.addColor( (255, 255, 000) )
+                    fader.addColor( (000, 255, 000) )
+                    fader.addColor( (000, 255, 255) )
+                    fader.addColor( (000, 000, 255) )          
+                    fader.setDelay(0)
+                    fader.setStep(1)
+                    fader.setSpeed(10)
+                    
+                elif commands[1] == "iitb":
+                    
+                    fader.addColor( (127, 127, 075) )
+                    fader.addColor( (064, 064, 032) )
+                    fader.setDelay(0)
+                    fader.setStep(1)
+                    fader.setSpeed(1.0)
+                    
+                elif commands[1] == "fire":
+                
+                    fader.addColor( (100, 020, 000) )
+                    fader.addColor( (060, 020, 000) )
+                    fader.addColor( (020, 000, 000) )
+                    fader.setDelay(0)
+                    fader.setStep(1)
+                    fader.setSpeed(2.0)
+                
+                elif commands[1] == "black":
+                    
+                    fader.addColor( (000, 000, 000) )
+                    fader.setDelay(0)
+                    fader.setStep(1)
+                    fader.setSpeed(1.0)
+                    
+                elif commands[1] == "white":
+                    
+                    fader.addColor( (255, 255, 255) )
+                    fader.setDelay(0)
+                    fader.setStep(1)
+                    fader.setSpeed(1.0)
+                    
+                elif commands[1] == "bnw":
+                    
+                    fader.addColor( (255, 255, 255) )
+                    fader.addColor( (000, 000, 000) )
+                    fader.setDelay(0)
+                    fader.setStep(1)
+                    fader.setSpeed(1.0)
+                    
+                elif commands[1] == "disco":
+                    
+                    fader.addColor( (255, 000, 000) )
+                    fader.addColor( (255, 255, 000) )
+                    fader.addColor( (000, 255, 000) )
+                    fader.addColor( (000, 255, 255) )
+                    fader.addColor( (000, 000, 255) )          
+                    fader.setDelay(0)
+                    fader.setStep(50)
+                    fader.setSpeed(0.25)
+                    fader.disableRandom()
+                    
+                else:
+                    
+                    fader.addColor( (000, 000, 000) )
+                    fader.setDelay(0)
+                    fader.setStep(1)
+                    fader.setSpeed(1.0)
+                    
+                # Part 2: Launch thread
+                worker.setPayload(fader)
+                worker.go()
+                
+                # Part 3: Display UI
+                self.sendHTMLUI("Fader changed to %s" % commands[1])
+            
+            elif commands[0] == "speed":
+                
+                try:
+                    speed = int(commands[1])
+                except:
+                    speed = 100
+                
+                if speed < 25:
+                    speed = 25
+                elif speed > 400:
+                    speed = 400
+                    
+                speed = 100.0 / speed
+                
+                # Part 1: Change speed
+                worker.setSpeed(speed)
+                
+                # Part 2: Display UI
+                self.sendHTMLUI("Speed changed to %s" % (1 / speed))
+            
+            elif commands[0] == "highlight":
+                
+                if commands[1] == "fireworks":
+                    
+                    controller = FireWorks(lightchain)
+                    worker.setPayload(controller)
+                    worker.go()
+    
+                elif commands[1] == "x-mas":
+                    
+                    controller = XMas(lightchain)
+                    worker.setPayload(controller)
+                    worker.go()
+                    
+                elif commands[1] == "raindrops":
+                    
+                    mode = int(commands[2])
+                    
+                    controller = Raindrops(lightchain, mode)
+                    worker.setPayload(controller)
+                    worker.go()
+                
+                
+                self.sendHTMLUI("Switched to %s" % commands[1])
+                
             else:
                 
-                cluster = FnordCluster()
+                self.sendHTMLUI()
                 
-                for i in range(len(lightchain)):
-                    cluster.registerLight(lightchain[i])
+                
+        except IndexError:
+            
+            self.sendHTMLUI("Error: Invalid parameters")
                     
-                lights.append(cluster)
-                
-            fader = FnordFaderArray(lights)
-            
-            # Part 1: Configure fader
-            
-            if commands[1] == "rainbow":
-                
-                fader.addColor( (255, 000, 000) )
-                fader.addColor( (255, 255, 000) )
-                fader.addColor( (000, 255, 000) )
-                fader.addColor( (000, 255, 255) )
-                fader.addColor( (000, 000, 255) )          
-                fader.setDelay(0)
-                fader.setStep(1)
-                fader.setSpeed(10)
-                
-            elif commands[1] == "iitb":
-                
-                fader.addColor( (127, 127, 075) )
-                fader.addColor( (064, 064, 032) )
-                fader.setDelay(0)
-                fader.setStep(1)
-                fader.setSpeed(1.0)
-                
-            elif commands[1] == "fire":
-            
-                fader.addColor( (100, 020, 000) )
-                fader.addColor( (060, 020, 000) )
-                fader.addColor( (020, 000, 000) )
-                fader.setDelay(0)
-                fader.setStep(1)
-                fader.setSpeed(2.0)
-            
-            elif commands[1] == "black":
-                
-                fader.addColor( (000, 000, 000) )
-                fader.setDelay(0)
-                fader.setStep(1)
-                fader.setSpeed(1.0)
-                
-            elif commands[1] == "white":
-                
-                fader.addColor( (255, 255, 255) )
-                fader.setDelay(0)
-                fader.setStep(1)
-                fader.setSpeed(1.0)
-                
-            elif commands[1] == "bnw":
-                
-                fader.addColor( (255, 255, 255) )
-                fader.addColor( (000, 000, 000) )
-                fader.setDelay(0)
-                fader.setStep(1)
-                fader.setSpeed(1.0)
-                
-            elif commands[1] == "disco":
-                
-                fader.addColor( (255, 000, 000) )
-                fader.addColor( (255, 255, 000) )
-                fader.addColor( (000, 255, 000) )
-                fader.addColor( (000, 255, 255) )
-                fader.addColor( (000, 000, 255) )          
-                fader.setDelay(0)
-                fader.setStep(50)
-                fader.setSpeed(0.25)
-                fader.disableRandom()
-                
-            else:
-                
-                fader.addColor( (000, 000, 000) )
-                fader.setDelay(0)
-                fader.setStep(1)
-                fader.setSpeed(1.0)
-                
-            # Part 2: Launch thread
-            worker.setPayload(fader)
-            worker.go()
-            
-            # Part 3: Display UI
-            self.sendHTMLUI("Fader changed to %s" % commands[1])
-        
-        elif commands[0] == "speed":
-            
-            try:
-                speed = int(commands[1])
-            except:
-                speed = 100
-            
-            if speed < 25:
-                speed = 25
-            elif speed > 400:
-                speed = 400
-                
-            speed = 100.0 / speed
-            
-            # Part 1: Change speed
-            worker.setSpeed(speed)
-            
-            # Part 2: Display UI
-            self.sendHTMLUI("Speed changed to %s" % (1 / speed))
-        
-        elif commands[0] == "highlight":
-            
-            if commands[1] == "fireworks":
-                
-                controller = FireWorks( lightchain )
-                worker.setPayload(controller)
-                worker.go()
-
-            elif commands[1] == "x-mas":
-                
-                controller = XMas( lightchain )
-                worker.setPayload(controller)
-                worker.go()
-                
-            elif commands[1] == "raindrops":
-                
-                controller = Raindrops( lightchain )
-                worker.setPayload(controller)
-                worker.go()
-            
-            
-            self.sendHTMLUI("Switched to %s" % commands[1])
-            
-        else:
-            
-            self.sendHTMLUI()
 
 
     def sendHTMLUI(self,  command = "", speed = "", message = "",
