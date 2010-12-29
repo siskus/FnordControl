@@ -593,9 +593,12 @@ class WorkerBase():
         self.speed = speed
         
                 
-    def wait(self, time):
+    def wait(self, time, jitter = True):
         
-        delay = random.random() * time * self.speed
+        if jitter:
+            delay = random.random() * time * self.speed
+        else:
+            delay = 0.5 * time * self.speed
         
         #if DEBUG:
         print("Waiting for %s seconds" % delay)
