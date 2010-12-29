@@ -43,9 +43,9 @@ DEBUG = 0
 #===============================================================================
 class FnordBus:
     
-    con = None
+    #con = None
     
-    lock = None
+    #lock = None
     
     # These three variables hold a "bus color". The controller has the ability
     # to let all the lights on bus display this color. It is controlled via

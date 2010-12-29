@@ -22,6 +22,7 @@ from FnordLib import FnordBus, FnordHelper, FnordCluster
 from FnordController.fader import FnordFaderArray
 from FnordController.fireworks import FireWorks
 from FnordController.xmas import XMas
+from FnordController.raindrops import Raindrops
 from FnordLib import FnordBusDummy
 from time import sleep
 import random
@@ -32,14 +33,14 @@ SERVER_PORT = 8001
 #IP_ADRESS = '192.168.3.100'
 IP_ADRESS = '192.168.1.195'
 #IP_ADRESS = '127.0.0.1'
-BUS_PORT = "/dev/ttyUSB0"
+#BUS_PORT = "/dev/ttyUSB1"
 DEBUG = 1
 
-LIGHTCOUNT = 10
+#LIGHTCOUNT = 10
 
-bus = None
 worker = None
 helper = None
+lightchain = []
 
 class  WorkerThread(Thread):
     
@@ -47,11 +48,10 @@ class  WorkerThread(Thread):
 #    bus = None
 #    command = None
     
-    def __init__(self, bus):
+    def __init__(self):
         Thread.__init__(self)
         
         self.running = 0
-        self.bus = bus
         self.command = None
         
     
@@ -119,15 +119,15 @@ class FnordServer(BaseHTTPRequestHandler):
             
             if commands[0] == "xcolors":
                 
-                for i in range(LIGHTCOUNT):
-                    lights.append(bus.getFnordLight(i))
+                for i in range(len(lightchain)):
+                    lights.append(lightchain[i])
                     
             else:
                 
                 cluster = FnordCluster()
                 
-                for i in range(LIGHTCOUNT):
-                    cluster.registerLight(bus.getFnordLight(i))
+                for i in range(len(lightchain)):
+                    cluster.registerLight(lightchain[i])
                     
                 lights.append(cluster)
                 
@@ -160,7 +160,7 @@ class FnordServer(BaseHTTPRequestHandler):
                 fader.addColor( (060, 020, 000) )
                 fader.addColor( (020, 000, 000) )
                 fader.setDelay(0)
-                fader.setStep(10)
+                fader.setStep(1)
                 fader.setSpeed(2.0)
             
             elif commands[1] == "black":
@@ -220,8 +220,8 @@ class FnordServer(BaseHTTPRequestHandler):
             
             if speed < 25:
                 speed = 25
-            elif speed > 200:
-                speed = 200
+            elif speed > 400:
+                speed = 400
                 
             speed = 100.0 / speed
             
@@ -235,16 +235,22 @@ class FnordServer(BaseHTTPRequestHandler):
             
             if commands[1] == "fireworks":
                 
-                controller = FireWorks( bus.getFnordLights() )
+                controller = FireWorks( lightchain )
                 worker.setPayload(controller)
                 worker.go()
 
             elif commands[1] == "x-mas":
                 
-                controller = XMas( bus.getFnordLights() )
+                controller = XMas( lightchain )
                 worker.setPayload(controller)
                 worker.go()
                 
+            elif commands[1] == "raindrops":
+                
+                controller = Raindrops( lightchain )
+                worker.setPayload(controller)
+                worker.go()
+            
             
             self.sendHTMLUI("Switched to %s" % commands[1])
             
@@ -313,11 +319,36 @@ class FnordServer(BaseHTTPRequestHandler):
     
 # public static void main ;-)
 
-bus = FnordBus(BUS_PORT)
+#bus = FnordBus(BUS_PORT)
 #bus = FnordBusDummy(BUS_PORT)
 
+# Setup for the new year
+
+# Layout:
+#
+#0 1 2 3 4 ---------- 0 1 2 3 4
+#=========            =========
+#  Bus 1                Bus 2
+
+bus1 = FnordBus("/dev/ttyUSB0")
+bus2 = FnordBus("/dev/ttyUSB1")
+
+for i in range(4):
+    lightchain.append(bus1.getFnordLight(i))
+    
+cluster = FnordCluster()
+
+cluster.registerLight(bus1.getFnordLight(4))
+cluster.registerLight(bus2.getFnordLight(0))
+
+lightchain.append(cluster)
+
+for i in range(4):
+    lightchain.append(bus2.getFnordLight(i + 1))
+
+
 helper = FnordHelper()
-worker = WorkerThread(bus)
+worker = WorkerThread()
 
 worker.daemon = 1
 worker.start()

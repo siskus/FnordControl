@@ -74,7 +74,7 @@ class XMas(WorkerBase):
             
             last_color = color
             
-        self.sleep(25)
+        sleep(25)
         
         for light in self.lights:
             
