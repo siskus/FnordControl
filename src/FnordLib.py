@@ -690,4 +690,20 @@ class FnordHelper():
         
         return (red, green, blue)
     
+    def getMaxBright(self, r, g, b):
+        
+        max = 0
+        
+        for i in r, g, b:
+            if max < i:
+                max = i
+                
+        # Maximize value
+        
+        r = int( (1.0 * r / max) * 255 )
+        g = int( (1.0 * g / max) * 255 )
+        b = int( (1.0 * b / max) * 255 )
+        
+        return (r, g, b)
+    
     

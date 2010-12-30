@@ -58,6 +58,7 @@ class Raindrops(WorkerBase):
                 
                 # Turn on light
                 r, g, b = self.helper.getRandomColor()
+                r, g, b = self.helper.getMaxBright(r, g, b)
                 
                 light.fade_rgb(r, g, b, 50, 0)
                 
@@ -104,6 +105,7 @@ class Raindrops(WorkerBase):
                 
                     # Turn on light
                     r, g, b = self.helper.getRandomColor()
+                    r, g, b = self.helper.getMaxBright(r, g, b)
                     
                     light.fade_rgb(r, g, b, 50, 0)
                     
