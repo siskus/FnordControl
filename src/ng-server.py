@@ -30,8 +30,8 @@ from threading import Thread
 import sys
 
 SERVER_PORT = 8001
-#IP_ADRESS = '192.168.3.100'
-IP_ADRESS = '192.168.1.195'
+IP_ADRESS = '192.168.3.101'
+#IP_ADRESS = '192.168.1.195'
 #IP_ADRESS = '127.0.0.1'
 #BUS_PORT = "/dev/ttyUSB1"
 DEBUG = 1
