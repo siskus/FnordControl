@@ -53,21 +53,45 @@ class Raindrops(WorkerBase):
             
             if self.mode == 1:
                 
-                # Select light            
-                light = self.lights[self.selectOrigin()]
+                nr_of_lights = random.randint(1, 3)
                 
-                # Turn on light
-                r, g, b = self.helper.getRandomColor()
-                r, g, b = self.helper.getMaxBright(r, g, b)
+                lights = []
                 
-                light.fade_rgb(r, g, b, 50, 0)
+                for i in range(nr_of_lights):
+                    
+                    needNewLight = True
+                    
+                    while needNewLight:
+                        
+                        light = self.lights[self.selectOrigin()]
+                        
+                        try:
+                            lights.index(light)
+                            #Bad, the list contains the light
+                            needNewLight = True
+                        except:
+                            # Good, the light is not alreay in the list
+                            
+                            needNewLight = False
+                            
+                    lights.append(light)  
+                        
                 
+                for light in lights:
+                    
+                    # Turn on light
+                    r, g, b = self.helper.getRandomColor()
+                    r, g, b = self.helper.getMaxBright(r, g, b)
+                    
+                    light.fade_rgb(r, g, b, 50, 0)
+                    
                 sleep(0.05)
                 #self.wait(0.05)
                 
-                # Fade the light totally
-                light.fade_rgb(0, 0, 0, 2, 0)
-                
+                for light in lights:
+                    # Fade the light totally
+                    light.fade_rgb(0, 0, 0, 2, 0)
+                    
                 #sleep(0.5)
                 self.wait(0.125)
                 
