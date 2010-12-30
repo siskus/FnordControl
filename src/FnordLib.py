@@ -684,11 +684,12 @@ class FnordHelper():
     
     def getRandomColor(self):
         
-        red = int(random.random() * 255)
-        green = int(random.random() * 255)
-        blue = int(random.random() * 255)
+        red = random.randint(0, 255) 
+        green = random.randint(0, 255)
+        blue = random.randint(0, 255)
         
         return (red, green, blue)
+    
     
     def getMaxBright(self, r, g, b):
         
