@@ -48,7 +48,7 @@ class XMas(WorkerBase):
 
     def getRandomColorIndex(self):
         
-        value = random.randint(0, len(self.colors))
+        value = random.randint(0, len(self.colors) - 1)
         
         return value
     

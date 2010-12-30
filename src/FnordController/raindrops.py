@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8-*-
 
-#         Skel
+#         Raindrops
 # A collection of classes to control fnordlights on different levels of 
 # abstraction
 #
@@ -40,7 +40,7 @@ class Raindrops(WorkerBase):
         
     def selectOrigin(self):
         
-        origin = int( floor( random.random() * self.light_count ) )
+        origin = random.randint(0, self.light_count - 1)
         
         return origin
     
@@ -57,6 +57,7 @@ class Raindrops(WorkerBase):
                 
                 lights = []
                 
+                # Select the lights, but not the same light twice
                 for i in range(nr_of_lights):
                     
                     needNewLight = True

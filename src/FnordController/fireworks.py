@@ -40,7 +40,7 @@ class FireWorks(WorkerBase):
     
     def selectOrigin(self):
         
-        origin = int( floor( random.random() * self.light_count ) )
+        origin = random.randint(0, self.light_count - 1)
         
         return origin
     
