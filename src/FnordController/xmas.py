@@ -74,13 +74,13 @@ class XMas(WorkerBase):
             
             last_color = color
             
-        sleep(25)
+        sleep(10)
         
         for light in self.lights:
             
             light.fade_rgb(0, 0, 0, self.step, self.delay)
             
-        self.wait(5)
+        self.wait(2.5)
         
         
             
