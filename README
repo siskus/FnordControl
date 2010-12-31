@@ -20,4 +20,3 @@ TODO
 ====
 - Give the controllers the possibility to display their own menu
 - Move the configuration (IP, Port, Layout) to an external Location
-- Move the fader configuration from the server to the fader

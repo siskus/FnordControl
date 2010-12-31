@@ -132,84 +132,13 @@ class FnordServer(BaseHTTPRequestHandler):
                         
                     lights.append(cluster)
                     
-                fader = FnordFaderArray(lights)
-                
-                # Part 1: Configure fader
-                
-                if commands[1] == "rainbow":
+                fader = FnordFaderArray(lights, commands[1])
                     
-                    fader.addColor( (255, 000, 000) )
-                    fader.addColor( (255, 255, 000) )
-                    fader.addColor( (000, 255, 000) )
-                    fader.addColor( (000, 255, 255) )
-                    fader.addColor( (000, 000, 255) )          
-                    fader.setDelay(0)
-                    fader.setStep(1)
-                    fader.setSpeed(10)
-                    
-                elif commands[1] == "iitb":
-                    
-                    fader.addColor( (127, 127, 075) )
-                    fader.addColor( (064, 064, 032) )
-                    fader.setDelay(0)
-                    fader.setStep(1)
-                    fader.setSpeed(1.0)
-                    
-                elif commands[1] == "fire":
-                
-                    fader.addColor( (100, 020, 000) )
-                    fader.addColor( (060, 020, 000) )
-                    fader.addColor( (020, 000, 000) )
-                    fader.setDelay(0)
-                    fader.setStep(1)
-                    fader.setSpeed(2.0)
-                
-                elif commands[1] == "black":
-                    
-                    fader.addColor( (000, 000, 000) )
-                    fader.setDelay(0)
-                    fader.setStep(1)
-                    fader.setSpeed(1.0)
-                    
-                elif commands[1] == "white":
-                    
-                    fader.addColor( (255, 255, 255) )
-                    fader.setDelay(0)
-                    fader.setStep(1)
-                    fader.setSpeed(1.0)
-                    
-                elif commands[1] == "bnw":
-                    
-                    fader.addColor( (255, 255, 255) )
-                    fader.addColor( (000, 000, 000) )
-                    fader.setDelay(0)
-                    fader.setStep(1)
-                    fader.setSpeed(1.0)
-                    
-                elif commands[1] == "disco":
-                    
-                    fader.addColor( (255, 000, 000) )
-                    fader.addColor( (255, 255, 000) )
-                    fader.addColor( (000, 255, 000) )
-                    fader.addColor( (000, 255, 255) )
-                    fader.addColor( (000, 000, 255) )          
-                    fader.setDelay(0)
-                    fader.setStep(50)
-                    fader.setSpeed(0.25)
-                    fader.disableRandom()
-                    
-                else:
-                    
-                    fader.addColor( (000, 000, 000) )
-                    fader.setDelay(0)
-                    fader.setStep(1)
-                    fader.setSpeed(1.0)
-                    
-                # Part 2: Launch thread
+                # Launch thread
                 worker.setPayload(fader)
                 worker.go()
                 
-                # Part 3: Display UI
+                # Display UI
                 self.sendHTMLUI("Fader changed to %s" % commands[1])
             
             elif commands[0] == "speed":

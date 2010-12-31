@@ -23,7 +23,6 @@ import sys
 
 sys.path.append('..');
 from FnordLib import WorkerBase
-from math import floor
 import random
 from time import sleep
 

@@ -108,9 +108,78 @@ class FnordFaderBase(WorkerBase):
         
 class FnordFaderArray(FnordFaderBase):
     
-    def __init__(self, lights):
+    def __init__(self, lights, mode):
         FnordFaderBase.__init__(self, lights)
         self.random = 1
+        
+        if mode == "rainbow":
+                    
+            self.addColor( (255, 000, 000) )
+            self.addColor( (255, 255, 000) )
+            self.addColor( (000, 255, 000) )
+            self.addColor( (000, 255, 255) )
+            self.addColor( (000, 000, 255) )          
+            self.setDelay(0)
+            self.setStep(1)
+            self.setSpeed(10)
+            
+        elif mode == "iitb":
+            
+            self.addColor( (127, 127, 075) )
+            self.addColor( (064, 064, 032) )
+            self.setDelay(0)
+            self.setStep(1)
+            self.setSpeed(1.0)
+            
+        elif mode == "fire":
+        
+            self.addColor( (100, 020, 000) )
+            self.addColor( (060, 020, 000) )
+            self.addColor( (020, 000, 000) )
+            self.setDelay(0)
+            self.setStep(1)
+            self.setSpeed(2.0)
+        
+        elif mode == "black":
+            
+            self.addColor( (000, 000, 000) )
+            self.setDelay(0)
+            self.setStep(1)
+            self.setSpeed(1.0)
+            
+        elif mode == "white":
+            
+            self.addColor( (255, 255, 255) )
+            self.setDelay(0)
+            self.setStep(1)
+            self.setSpeed(1.0)
+            
+        elif mode == "bnw":
+            
+            self.addColor( (255, 255, 255) )
+            self.addColor( (000, 000, 000) )
+            self.setDelay(0)
+            self.setStep(1)
+            self.setSpeed(1.0)
+            
+        elif mode == "disco":
+            
+            self.addColor( (255, 000, 000) )
+            self.addColor( (255, 255, 000) )
+            self.addColor( (000, 255, 000) )
+            self.addColor( (000, 255, 255) )
+            self.addColor( (000, 000, 255) )          
+            self.setDelay(0)
+            self.setStep(50)
+            self.setSpeed(0.25)
+            self.disableRandom()
+            
+        else:
+            
+            self.addColor( (000, 000, 000) )
+            self.setDelay(0)
+            self.setStep(1)
+            self.setSpeed(1.0)
         
         
     def enableRandom(self):
